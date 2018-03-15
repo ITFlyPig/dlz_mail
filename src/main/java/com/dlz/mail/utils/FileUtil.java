@@ -80,7 +80,27 @@ public class FileUtil {
            fileName = fileName.substring(0, fileName.lastIndexOf("."));
         }
         return fileName;
+    }
 
+    /**
+     * 得到文件的名称，包含文件的后缀名
+     * @param path 可以使绝对路径，也可以是只有文件名
+     * @return
+     */
+    public static String getFileNameWithType(String path){
+        String fileName ="";
+        if (TextUtil.isEmpty(path)){
+            fileName = System.currentTimeMillis() + "";
+            return fileName;
+        }
+
+        if (path.contains(File.separator)){//表示是路径
+            fileName  = path.substring(path.lastIndexOf(File.separator) + 1);
+
+        }else {
+            fileName = path;
+        }
+        return fileName;
     }
 
 }

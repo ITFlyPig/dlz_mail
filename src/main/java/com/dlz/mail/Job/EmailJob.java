@@ -64,6 +64,7 @@ public class EmailJob implements Job {
             boolean result = EmailUtil.sendAttachmentEmail(mailTaskBean.filePath,  mailTaskBean.getSubject(),
                     mailTaskBean.getMailContent(), mailTaskBean.parseReceptions(), mailTaskBean.parseCopyTos());
             //对于已发送的邮件，更新状态
+            Log.d("邮件：" + mailTaskBean.getTask_name() + " 发送" + (result ? "成功" : "失败"));
             if (result){
                 DBUtil.update(Constant.SQL.UPDATE_TASK_STATUS, Constant.EmailStatus.SEND_SUCCESS, task.getId());
             }else {

@@ -38,7 +38,7 @@ public class EmailUtil {
         attachment.setPath(file.getAbsolutePath());
         attachment.setDisposition(EmailAttachment.ATTACHMENT);
         attachment.setDescription("excel");
-        String fileName = FileUtil.getFileName(attachmentPath);
+        String fileName = FileUtil.getFileNameWithType(attachmentPath);
         if (TextUtil.isEmpty(fileName)){
             fileName = "查询结果";
         }

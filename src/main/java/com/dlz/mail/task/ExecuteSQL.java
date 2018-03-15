@@ -117,6 +117,7 @@ public class ExecuteSQL implements Runnable {
                 mailTaskBean.end_time != null && curTime >= sendTime && curTime < mailTaskBean.end_time.getTime()){//到了发送时间，但是还没到过期时间
             //直接发送
             boolean result = sendEmail(mailTaskBean);
+            Log.d("邮件：" + mailTaskBean.getTask_name() + " 发送" + (result ? "成功" : "失败"));
 
             int status = result ? Constant.EmailStatus.SEND_SUCCESS : Constant.EmailStatus.SEND_FAIL;
             DBUtil.update(Constant.SQL.UPDATE_TASK_STATUS, status, mailTaskBean.getId());
