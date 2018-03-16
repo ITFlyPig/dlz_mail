@@ -54,7 +54,7 @@ public class ExecuteSQL implements Runnable {
             try {
                 String path = queryRunner.query(mailTaskBean.sql, new CSVResultHandler(mailTaskBean.task_name));
                 path = handleZIP(path);//检查是否应该压缩
-
+                Log.d("压缩处理后的文件路径：" + (path == null ? "" : path));
 
                 if (!TextUtil.isEmpty(path)){//立即发送或者定时
                     mailTaskBean.filePath = path;
@@ -63,6 +63,7 @@ public class ExecuteSQL implements Runnable {
                     Log.d("任务：" + mailTaskBean.task_name + " 创建csv失败");
                 }
             } catch (SQLException e) {
+                Log.d("任务：" + mailTaskBean.task_name + " 执行sql查询失败");
                 e.printStackTrace();
             }
         }
@@ -116,6 +117,7 @@ public class ExecuteSQL implements Runnable {
                 ||
                 mailTaskBean.end_time != null && curTime >= sendTime && curTime < mailTaskBean.end_time.getTime()){//到了发送时间，但是还没到过期时间
             //直接发送
+            Log.d("立即发送邮件：" + mailTaskBean.getTask_name() );
             boolean result = sendEmail(mailTaskBean);
             Log.d("邮件：" + mailTaskBean.getTask_name() + " 发送" + (result ? "成功" : "失败"));
 
@@ -126,6 +128,7 @@ public class ExecuteSQL implements Runnable {
         }
 
         if (sendTime > curTime){//对发送任务定时并且写入到数据库
+            Log.d("定时发送邮件：" + mailTaskBean.getTask_name() );
             QuartzManager.addJob(mailTaskBean.getTask_name(), String.valueOf(mailTaskBean.getId()), "email",EmailJob.class, mailTaskBean.generateCron());
             DBUtil.update("update mail set filePath = ?, status = ? where id = ?", mailTaskBean.getFilePath(), Constant.EmailStatus.WAIT_SEND, mailTaskBean.getId());
             return;
@@ -133,6 +136,7 @@ public class ExecuteSQL implements Runnable {
         //丢弃这个任务
         //TODO 对应丢弃的任务还得发送邮件通知管理员
         EmailUtil.sendMail(mailTaskBean.getManagerEmail(), "邮件系统报警", "邮件任务被丢弃：" + mailTaskBean.getTask_name());
+        Log.d("丢弃邮件任务：" + mailTaskBean.getTask_name() );
 
     }
 
@@ -153,7 +157,7 @@ public class ExecuteSQL implements Runnable {
             File[] files = new File[]{srcFile};
 
             String zipName = FileUtil.getFileName(filePath) + ".zip";
-            String zipPath = srcFile.getPath() + File.separator + zipName;
+            String zipPath = srcFile.getParent() + File.separator + zipName;
             ZipFileUtil.compressFiles2Zip(files, zipPath);
 
             return zipPath;

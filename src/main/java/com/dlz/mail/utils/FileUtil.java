@@ -10,7 +10,9 @@ import java.io.*;
 public class FileUtil {
     private static final String TAG = "FileUtil";
 
-    private static int ZIP_SIZE = 2 * 1024 * 1024;//文件大小超过2M就进行压缩
+//    private static int ZIP_SIZE = 2 * 1024 * 1024;//文件大小超过2M就进行压缩
+
+    private static int ZIP_SIZE = 1;//文件大小超过2M就进行压缩
 
 
 

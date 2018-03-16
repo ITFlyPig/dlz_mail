@@ -199,6 +199,8 @@ public class MailTaskBean {
         this.managerEmail = managerEmail;
     }
 
+
+
     /**
      * 生成cron表达式
      * @return

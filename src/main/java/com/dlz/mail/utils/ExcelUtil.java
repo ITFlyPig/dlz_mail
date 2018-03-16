@@ -124,8 +124,12 @@ public class ExcelUtil {
                 for (int j = 0; j < rowData.size(); j++) {
                     //创建要显示的内容,创建一个单元格，第一个参数为列坐标，第二个参数为行坐标，第三个参数为内容
                     Object cellData = rowData.get(j);
+                    String  cellStr= "";
+                    if (cellData != null){
+                        cellStr = cellData.toString();
+                    }
                     HSSFCell cell = row.createCell(j);//创建列
-                    cell.setCellValue(cellData.toString());
+                    cell.setCellValue(cellStr);
                     cell.setCellStyle(style);
 
                 }

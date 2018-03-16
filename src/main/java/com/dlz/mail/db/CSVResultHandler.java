@@ -1,6 +1,5 @@
 package com.dlz.mail.db;
 
-import com.dlz.mail.Test;
 import com.dlz.mail.utils.Constant;
 import com.dlz.mail.utils.ExcelUtil;
 import com.dlz.mail.utils.Log;
@@ -62,9 +61,10 @@ public class CSVResultHandler implements ResultSetHandler<String> {
             List<Object> rowDataList = new ArrayList<Object>();
             for (int i = 1; i <= clonumnCount; i++) {
                 Object valueObject = getValueByType(data.getColumnType(i), rs, i);
-                if(valueObject != null){
-                    rowDataList.add(valueObject);
+                if (valueObject == null){//处理单元格没有值的情况
+                    valueObject = "";
                 }
+                rowDataList.add(valueObject);
             }
             contentList.add(rowDataList);
 
