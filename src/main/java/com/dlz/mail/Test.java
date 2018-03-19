@@ -3,8 +3,10 @@ package com.dlz.mail;
 import com.dlz.mail.bean.MailConfBean;
 import com.dlz.mail.bean.MailTaskBean;
 import com.dlz.mail.db.DBUtil;
+import com.dlz.mail.queue.TaskQueue;
 import com.dlz.mail.task.ExecuteSQL;
 import com.dlz.mail.task.GetTasks;
+import com.dlz.mail.task.MonitorTask;
 import com.dlz.mail.utils.Constant;
 import com.dlz.mail.utils.EmailUtil;
 import com.dlz.mail.utils.Log;
@@ -12,6 +14,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.*;
@@ -29,20 +32,15 @@ public class Test {
         EmailUtil.mailConf = mailConfBean;
 
 
-        BlockingQueue<MailTaskBean> sqlQueue = new ArrayBlockingQueue<MailTaskBean>(30);
-        GetTasks getTasks = new GetTasks(sqlQueue);
-        new Thread(getTasks).start();
+        TaskQueue taskQueue = new TaskQueue();
+        startGetTasks(taskQueue);//开始sql任务的查询
 
-        BlockingQueue<MailTaskBean> sendMailQueue = new ArrayBlockingQueue<MailTaskBean>(30);
+        startMonitorFile(taskQueue);//开始文件的检测
+
         for (int i = 0; i < 1; i++){
-            ExecuteSQL executeSQL = new ExecuteSQL(sendMailQueue, sqlQueue);
+            ExecuteSQL executeSQL = new ExecuteSQL(taskQueue);
             executorService.submit(executeSQL);
         }
-
-
-
-
-
 
     }
 
@@ -85,4 +83,44 @@ public class Test {
         }
 
     }
+
+    /**
+     * 开始监听文件的变化
+     *
+     */
+    private static void startMonitorFile(final TaskQueue taskQueue){
+        String sqlMonitorPath = System.getProperty("user.dir") + Constant.FileConfig.CONF_DIR ;
+        MonitorTask monitorTask = new MonitorTask(sqlMonitorPath, new MonitorTask.FileChangeListener() {
+            @Override
+            public void onCreated(String path) {
+
+            }
+
+            @Override
+            public void onDelete(String path) {
+
+            }
+
+            @Override
+            public void onModify(String path) {
+                Log.d("唤醒查询sql任务的线程");
+                taskQueue.startGetSQlTasks();//唤醒查询sql任务的线程
+
+            }
+        });
+        executorService.submit(monitorTask);
+
+    }
+
+
+    /**
+     * 开始查询sql的
+     * @param taskQueue
+     */
+    private static void startGetTasks(TaskQueue taskQueue){
+        GetTasks getTasks = new GetTasks(taskQueue);
+        new Thread(getTasks).start();
+    }
+
+
 }

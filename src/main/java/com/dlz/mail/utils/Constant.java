@@ -14,14 +14,16 @@ public class Constant {
 	}
 
 	public interface SQL{
-		String GET_TASKS = "select * from mail where status = ?";//获取邮件任务
+		String GET_TASKS = "select * from mail where id = ?";//获取邮件任务
 		String GET_SEND_MAIL = "select * from send_mail";//获取邮件发送者的邮件账户配置
 		String GET_TASK_BY_ID = "select * from mail where id = ?";//据id查询对应的邮件任务
 		String UPDATE_TASK_STATUS = "update mail set status = ? where id = ?";//更新邮件任务的状态
+		String GET_WAIT_HANDLE_SQL_TASK = "select * from mail where status = ?";//获取到处理的sql任务
 	}
 
 	public interface FileConfig{
 		String CSV_DIR = "/files/csv";
+		String CONF_DIR = "/conf";
 	}
 
 	/**
@@ -36,6 +38,18 @@ public class Constant {
 		int WAIT_SEND = 4;
 		int SEND_SUCCESS = 5;
 		int SEND_FAIL = 6;
+	}
+
+	/**
+	 * 文件的名称
+	 */
+	public interface FileNames{
+		String SQL_MONITOR_FILE = "execute_sql.properties";//监视sql任务变化的文件
+	}
+
+	public interface Key{
+		String EMAIL_TASK_ID = "email_task_id";
+		String TASK_NAME = "task_name";
 	}
 
 }

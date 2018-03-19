@@ -1,7 +1,10 @@
 package com.dlz.mail.timer;
 
+import com.dlz.mail.utils.TextUtil;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+
+import java.util.Calendar;
 
 /**
  * 定时任务的管理类
@@ -20,7 +23,7 @@ public class QuartzManager {
      * @param cron   时间设置，参考quartz说明文档
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static void addJob(String jobName, String emailTaskId,  String triggerName, Class jobClass, String cron) {
+    public static void addJob(String jobName, String emailTaskId,  String triggerName, Class jobClass, String cron, Object obj) {
         try {
             Scheduler sched = schedulerFactory.getScheduler();
             // 任务名，任务组，任务执行类
@@ -29,6 +32,9 @@ public class QuartzManager {
             JobDataMap jobDataMap = jobDetail.getJobDataMap();
             jobDataMap.put("email_task_id", emailTaskId);
             jobDataMap.put("jobName", jobName);
+            if (obj != null){
+                jobDataMap.put("obj", obj);
+            }
 
             // 触发器
             TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger();
@@ -36,6 +42,7 @@ public class QuartzManager {
             triggerBuilder.withIdentity(triggerName, TRIGGER_GROUP_NAME);
             triggerBuilder.startNow();
             // 触发器时间设定
+            //将yyyy-mm-dd hh:mm:ss 的时间格式转换为quartz_CronExpression
             triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(cron));
             // 创建Trigger对象
             CronTrigger trigger = (CronTrigger) triggerBuilder.build();
@@ -51,6 +58,7 @@ public class QuartzManager {
             throw new RuntimeException(e);
         }
     }
+
 
     /**
      * @Description: 修改一个任务的触发时间

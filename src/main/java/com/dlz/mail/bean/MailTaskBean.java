@@ -6,6 +6,7 @@ import com.dlz.mail.utils.TextUtil;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.Calendar;
 
 public class MailTaskBean {
     public int id;
@@ -15,6 +16,7 @@ public class MailTaskBean {
     public Timestamp send_time;//邮件发送时间
     public Timestamp end_time;//邮件结束时间
     public Timestamp new_time;//邮件新建的时间
+    public Timestamp excuteTime;//执行sql的时间
     public String receptions;//邮件的接受者
     public String copy_to_mails;//邮件的抄送者列表
 
@@ -199,7 +201,13 @@ public class MailTaskBean {
         this.managerEmail = managerEmail;
     }
 
+    public Timestamp getExcuteTime() {
+        return excuteTime;
+    }
 
+    public void setExcuteTime(Timestamp excuteTime) {
+        this.excuteTime = excuteTime;
+    }
 
     /**
      * 生成cron表达式
@@ -212,6 +220,24 @@ public class MailTaskBean {
             return "";
         }else {
             return second + min + hour + day + month + week;
+        }
+    }
+
+    /**
+     * 生成执行sql的表达式
+     * @return
+     */
+    public String generateExecutSQlCron(){
+        if (getExcuteTime() == null){
+            Log.d("生成cron表达式失败");
+            return "";
+        }else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(getExcuteTime());
+            String cron = calendar.get(Calendar.SECOND)  + " "+ calendar.get(Calendar.MINUTE) + " "+ calendar.get(Calendar.HOUR_OF_DAY)+ " "+ calendar.get(Calendar.DAY_OF_MONTH)
+                    +" "+ (calendar.get(Calendar.MONTH) + 1)+ " "+ "?" + " " + calendar.get(Calendar.YEAR);
+            Log.d("生成的定时执行slq的cron表达式：" + cron);
+            return cron;
         }
     }
 

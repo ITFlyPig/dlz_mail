@@ -4,6 +4,7 @@ import com.dlz.mail.Job.EmailJob;
 import com.dlz.mail.bean.MailTaskBean;
 import com.dlz.mail.db.CSVResultHandler;
 import com.dlz.mail.db.DBUtil;
+import com.dlz.mail.queue.TaskQueue;
 import com.dlz.mail.timer.CronTriggerUtil;
 import com.dlz.mail.timer.QuartzManager;
 import com.dlz.mail.utils.*;
@@ -12,27 +13,24 @@ import org.apache.commons.dbutils.QueryRunner;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * 从任务队列中取出sql任务来执行，然后生成csv文件，最后放入邮件发送队列
  */
 public class ExecuteSQL implements Runnable {
-    private BlockingQueue<MailTaskBean> sendMailQueue;//等待发送的邮件队列
-    private BlockingQueue<MailTaskBean> sqlQueue ;//等待处理的任务队列
+    private TaskQueue mTaskQueue;//等待处理的任务队列
     private boolean isStop;//表示线程是否结束
 
-    public ExecuteSQL(BlockingQueue<MailTaskBean> sendMailQueue, BlockingQueue<MailTaskBean> sqlQueue) {
-        this.sendMailQueue = sendMailQueue;
-        this.sqlQueue = sqlQueue;
+    public ExecuteSQL(TaskQueue taskQueue) {
+         mTaskQueue = taskQueue;
     }
 
     public void run() {
         while (!isStop){
-            Log.d("待执行的sql任务数：" + sqlQueue.size());
+            Log.d("待执行的sql任务数：" + mTaskQueue.getSqlQueue().size());
             MailTaskBean mailTaskBean = null;
             try {
-                mailTaskBean = sqlQueue.take();
+                mailTaskBean = mTaskQueue.getSqlQueue().take();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -129,7 +127,7 @@ public class ExecuteSQL implements Runnable {
 
         if (sendTime > curTime){//对发送任务定时并且写入到数据库
             Log.d("定时发送邮件：" + mailTaskBean.getTask_name() );
-            QuartzManager.addJob(mailTaskBean.getTask_name(), String.valueOf(mailTaskBean.getId()), "email",EmailJob.class, mailTaskBean.generateCron());
+            QuartzManager.addJob(mailTaskBean.getTask_name(), String.valueOf(mailTaskBean.getId()), "send_email",EmailJob.class, mailTaskBean.generateCron(), mTaskQueue);
             DBUtil.update("update mail set filePath = ?, status = ? where id = ?", mailTaskBean.getFilePath(), Constant.EmailStatus.WAIT_SEND, mailTaskBean.getId());
             return;
         }
