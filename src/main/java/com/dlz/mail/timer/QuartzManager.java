@@ -26,6 +26,7 @@ public class QuartzManager {
     public static void addJob(String jobName, String emailTaskId,  String triggerName, Class jobClass, String cron, Object obj) {
         try {
             Scheduler sched = schedulerFactory.getScheduler();
+            sched.deleteJob(JobKey.jobKey(jobName, JOB_GROUP_NAME));// 删除任务,相同的任务只需要定时一次
             // 任务名，任务组，任务执行类
             JobDetail jobDetail= JobBuilder.newJob(jobClass).withIdentity(jobName, JOB_GROUP_NAME).build();
 

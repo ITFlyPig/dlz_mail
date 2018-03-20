@@ -28,7 +28,7 @@ public class Constant {
 
 	/**
 	 * 邮件任务的状态
-	 * 0：新建  1：正在执行  2：执行成功  3：执行失败  4：待发送  5：发送成成功   6：发送失败
+	 * 邮件任务的状态  0：新建  1：正在执行  2：执行成功  3：执行失败  4：待发送  5：发送成成功   6：发送失败 7：sql查询已定时  8：邮件发送已定时 9:修改更新
 	 */
 	public interface EmailStatus{
 		int NEW = 0;
@@ -38,6 +38,10 @@ public class Constant {
 		int WAIT_SEND = 4;
 		int SEND_SUCCESS = 5;
 		int SEND_FAIL = 6;
+		int SQL_EXCUTE_TIMER = 7;
+		int EMAIL_SEND_TIMER = 8;
+		int UPDATED = 9;
+
 	}
 
 	/**

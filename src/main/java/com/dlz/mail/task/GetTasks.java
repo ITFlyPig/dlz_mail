@@ -43,8 +43,8 @@ public class GetTasks implements Runnable {
                 try {
                     ComboPooledDataSource dataSource = DBUtil.getDataSource();
                     QueryRunner queryRunner = new QueryRunner(dataSource);
-                    List<MailTaskBean> tasks = queryRunner.query(Constant.SQL.GET_WAIT_HANDLE_SQL_TASK, new BeanListHandler<MailTaskBean>(MailTaskBean.class), Constant.EmailStatus.NEW);
-
+                    List<MailTaskBean> tasks = queryRunner.query("select * from mail where status = ? or status = ?", new BeanListHandler<MailTaskBean>(MailTaskBean.class), Constant.EmailStatus.NEW, Constant.EmailStatus.UPDATED);
+                    mTaskQueue.removeOldTimers(tasks);
                     mTaskQueue.addSqlTask(tasks);
                 } catch (SQLException e) {
                     e.printStackTrace();

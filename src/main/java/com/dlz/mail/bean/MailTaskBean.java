@@ -19,6 +19,7 @@ public class MailTaskBean {
     public Timestamp excuteTime;//执行sql的时间
     public String receptions;//邮件的接受者
     public String copy_to_mails;//邮件的抄送者列表
+    public Timestamp exTime;
 
     /**
      * 用于设置cron表达式
@@ -137,6 +138,9 @@ public class MailTaskBean {
     }
 
     public String getTask_name() {
+        if (TextUtil.isEmpty(task_name)){
+            task_name = "任务：" + getId();
+         }
         return task_name;
     }
 
@@ -207,6 +211,14 @@ public class MailTaskBean {
 
     public void setExcuteTime(Timestamp excuteTime) {
         this.excuteTime = excuteTime;
+    }
+
+    public Timestamp getExTime() {
+        return exTime;
+    }
+
+    public void setExTime(Timestamp exTime) {
+        this.exTime = exTime;
     }
 
     /**

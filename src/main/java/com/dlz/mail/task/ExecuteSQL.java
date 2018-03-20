@@ -127,7 +127,7 @@ public class ExecuteSQL implements Runnable {
 
         if (sendTime > curTime){//对发送任务定时并且写入到数据库
             Log.d("定时发送邮件：" + mailTaskBean.getTask_name() );
-            QuartzManager.addJob(mailTaskBean.getTask_name(), String.valueOf(mailTaskBean.getId()), "send_email",EmailJob.class, mailTaskBean.generateCron(), mTaskQueue);
+            QuartzManager.addJob(mailTaskBean.getTask_name() + "邮件发送", String.valueOf(mailTaskBean.getId()), "send_email",EmailJob.class, mailTaskBean.generateCron(), mTaskQueue);
             DBUtil.update("update mail set filePath = ?, status = ? where id = ?", mailTaskBean.getFilePath(), Constant.EmailStatus.WAIT_SEND, mailTaskBean.getId());
             return;
         }
