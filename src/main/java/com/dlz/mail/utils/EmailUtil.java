@@ -26,6 +26,7 @@ public class EmailUtil {
      */
     public static boolean sendAttachmentEmail(String attachmentPath,
                                               String subject, String content, String[] recipients, String[] copyTos){
+
         if (mailConf == null){
             Log.d("发件人邮件的配置为空");
             return false;
@@ -50,7 +51,13 @@ public class EmailUtil {
         try {
             email.addTo(recipients);
             email.setFrom(mailConf.getUser());
+            if (TextUtil.isEmpty(subject)){
+                subject = "";
+            }
             email.setSubject(subject);
+            if (TextUtil.isEmpty(content)){
+                content = " ";
+            }
             email.setMsg(content);
             email.attach(attachment);
             //添加抄送人

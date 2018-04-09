@@ -5,6 +5,8 @@ import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 
@@ -15,6 +17,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 public class ExcelUtil {
+    private static final Logger logger =  LogManager.getLogger(ExcelUtil.class);
     private static String TAG = "ExcelUtil";
 
     /**
@@ -89,19 +92,20 @@ public class ExcelUtil {
      * @return
      */
     public static String createExcelByPOI(String outPutPath, String fileName, List<List<Object>> data) {
-        Log.d("开始创建Excel文件");
+        logger.debug("开始创建Excel文件");
         if (TextUtil.isEmpty(outPutPath)) {
-            Log.e("createExcelByPOI创建excel失败，保存的路径为空");
+            logger.debug("createExcelByPOI创建excel失败，保存的路径为空");
             return "";
         }
         if (TextUtil.isEmpty(fileName)) {
-            Log.e("createExcelByPOI创建excel失败，文件名为空");
+            logger.debug("createExcelByPOI创建excel失败，文件名为空");
             return "";
         }
         if (data == null || data.size() == 0) {
-            Log.e("createExcelByPOI创建excel失败，数据集为空");
+            logger.debug("createExcelByPOI创建excel失败，数据集为空");
             return "";
         }
+        logger.debug("查询到的总行数：" + data.size());
 
         HSSFWorkbook wb = null;
         try {
@@ -115,18 +119,24 @@ public class ExcelUtil {
             style.setAlignment(HorizontalAlignment.CENTER);//居中
 
 
+            logger.debug("开始循环" );
             int columNum = 0;
             int rowSize = data.size();//行的size
             for (int i = 0; i < rowSize; i++) {
+                logger.debug("外层循环" );
                 HSSFRow row = sheet.createRow(i);//创建行
                 List<Object> rowData = data.get(i);//每一行的数据
                 columNum = rowData.size();
                 for (int j = 0; j < rowData.size(); j++) {
+                    logger.debug("内层循环" );
                     //创建要显示的内容,创建一个单元格，第一个参数为列坐标，第二个参数为行坐标，第三个参数为内容
                     Object cellData = rowData.get(j);
                     String  cellStr= "";
                     if (cellData != null){
                         cellStr = cellData.toString();
+                    }
+                    if (TextUtil.isEmpty(cellStr)){
+                        cellStr = " ";
                     }
                     HSSFCell cell = row.createCell(j);//创建列
                     cell.setCellValue(cellStr);
@@ -135,6 +145,7 @@ public class ExcelUtil {
                 }
             }
 
+            logger.debug("调整宽度" );
             //自动调整每一列的宽度
             for (int i = 0; i < columNum; i++){
                 sheet.autoSizeColumn(i);
@@ -144,6 +155,8 @@ public class ExcelUtil {
 
         }catch (Exception e){
             e.printStackTrace();
+            logger.debug("异常" );
+            logger.debug(e.getLocalizedMessage());
         }
 
 
@@ -162,7 +175,7 @@ public class ExcelUtil {
                     file.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Log.d(TAG, "缓存文件创建失败");
+                    logger.debug( "缓存文件创建失败");
                 }
             }
 
@@ -174,6 +187,7 @@ public class ExcelUtil {
             return fileStr;
         } catch (IOException e) {
             e.printStackTrace();
+            logger.debug(e.getLocalizedMessage());
         }
 
         return "";

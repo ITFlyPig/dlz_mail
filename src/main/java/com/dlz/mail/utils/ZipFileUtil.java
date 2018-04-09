@@ -3,6 +3,8 @@ package com.dlz.mail.utils;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.io.*;
 
@@ -10,6 +12,7 @@ import java.io.*;
  * Created by wangyuelin on 2017/12/21.
  */
 public class ZipFileUtil {
+    private static final Logger logger = LogManager.getLogger(ZipFileUtil.class);
 
     /**
      * 把文件压缩成zip格式
@@ -54,9 +57,9 @@ public class ZipFileUtil {
                         }
                     }
                     zaos.finish();
-                    Log.d("文件压缩成功");
+                    logger.debug("文件压缩成功");
                 }catch(Exception e){
-                    Log.d("文件压缩失败");
+                    logger.debug("文件压缩失败");
                     throw new RuntimeException(e);
                 }finally {
                     try {

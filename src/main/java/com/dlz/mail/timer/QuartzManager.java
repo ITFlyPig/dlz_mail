@@ -25,6 +25,9 @@ public class QuartzManager {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static void addJob(String jobName, String emailTaskId,  String triggerName, Class jobClass, String cron, Object obj) {
         try {
+            removeJob(jobName, triggerName);
+
+
             Scheduler sched = schedulerFactory.getScheduler();
             sched.deleteJob(JobKey.jobKey(jobName, JOB_GROUP_NAME));// 删除任务,相同的任务只需要定时一次
             // 任务名，任务组，任务执行类
@@ -56,6 +59,7 @@ public class QuartzManager {
                 sched.start();
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

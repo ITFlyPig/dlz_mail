@@ -17,19 +17,9 @@ public class MailTaskBean {
     public Timestamp end_time;//邮件结束时间
     public Timestamp new_time;//邮件新建的时间
     public Timestamp excuteTime;//执行sql的时间
+    public Timestamp update_time;
     public String receptions;//邮件的接受者
     public String copy_to_mails;//邮件的抄送者列表
-    public Timestamp exTime;
-
-    /**
-     * 用于设置cron表达式
-     */
-    public String second;
-    public String min;
-    public String hour;
-    public String day;
-    public String month;
-    public String week;
 
     public String task_name;//任务的名称,
 
@@ -39,6 +29,14 @@ public class MailTaskBean {
     public String mailContent;//邮件的内容
     public String managerEmail;//管理员的邮件
 
+
+    public Timestamp getUpdate_time() {
+        return update_time;
+    }
+
+    public void setUpdate_time(Timestamp update_time) {
+        this.update_time = update_time;
+    }
 
     public String getSql() {
         return sql;
@@ -60,25 +58,6 @@ public class MailTaskBean {
         return new_time;
     }
 
-    public String getMin() {
-        return min;
-    }
-
-    public String getHour() {
-        return hour;
-    }
-
-    public String getDay() {
-        return day;
-    }
-
-    public String getMonth() {
-        return month;
-    }
-
-    public String getWeek() {
-        return week;
-    }
 
 
     public void setSql(String sql) {
@@ -101,25 +80,6 @@ public class MailTaskBean {
         this.new_time = new_time;
     }
 
-    public void setMin(String min) {
-        this.min = min;
-    }
-
-    public void setHour(String hour) {
-        this.hour = hour;
-    }
-
-    public void setDay(String day) {
-        this.day = day;
-    }
-
-    public void setMonth(String month) {
-        this.month = month;
-    }
-
-    public void setWeek(String week) {
-        this.week = week;
-    }
 
     public String getReceptions() {
         return receptions;
@@ -180,13 +140,6 @@ public class MailTaskBean {
         this.id = id;
     }
 
-    public String getSecond() {
-        return second;
-    }
-
-    public void setSecond(String second) {
-        this.second = second;
-    }
 
     public String getMailContent() {
         return mailContent;
@@ -206,51 +159,48 @@ public class MailTaskBean {
     }
 
     public Timestamp getExcuteTime() {
-        return excuteTime;
+        return send_time;
     }
 
     public void setExcuteTime(Timestamp excuteTime) {
         this.excuteTime = excuteTime;
     }
 
-    public Timestamp getExTime() {
-        return exTime;
-    }
 
-    public void setExTime(Timestamp exTime) {
-        this.exTime = exTime;
-    }
-
-    /**
-     * 生成cron表达式
-     * @return
-     */
-    public String generateCron(){
-        if (TextUtil.isEmpty(second) || TextUtil.isEmpty(min) || TextUtil.isEmpty(hour) || TextUtil.isEmpty(day)
-                || TextUtil.isEmpty(month) || TextUtil.isEmpty(week)){
-            Log.d("生成cron表达式失败");
-            return "";
-        }else {
-            return second + min + hour + day + month + week;
-        }
-    }
 
     /**
      * 生成执行sql的表达式
      * @return
      */
     public String generateExecutSQlCron(){
-        if (getExcuteTime() == null){
+        return generateCron(getExcuteTime());
+    }
+
+    /**
+     * 生成定时使用的cron表达式
+     * @param timestamp
+     * @return
+     */
+    public String generateCron(Timestamp timestamp){
+        if (timestamp == null){
             Log.d("生成cron表达式失败");
             return "";
         }else {
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(getExcuteTime());
+            calendar.setTime(timestamp);
             String cron = calendar.get(Calendar.SECOND)  + " "+ calendar.get(Calendar.MINUTE) + " "+ calendar.get(Calendar.HOUR_OF_DAY)+ " "+ calendar.get(Calendar.DAY_OF_MONTH)
                     +" "+ (calendar.get(Calendar.MONTH) + 1)+ " "+ "?" + " " + calendar.get(Calendar.YEAR);
-            Log.d("生成的定时执行slq的cron表达式：" + cron);
+            Log.d("生成的定时执行的cron表达式：" + cron);
             return cron;
         }
+    }
+
+    /**
+     * 生成定时发送邮件的cron
+     * @return
+     */
+    public String generateSendEmailCron(){
+        return generateCron(getSend_time());
     }
 
     /**
@@ -279,4 +229,5 @@ public class MailTaskBean {
         String[] reArray = copy_to_mails.split(";");
         return reArray;
     }
+
 }

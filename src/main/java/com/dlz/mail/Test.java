@@ -13,6 +13,9 @@ import com.dlz.mail.utils.Log;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -20,6 +23,14 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class Test {
+    private static final Logger logger;
+
+    static {
+        PropertyConfigurator.configure( System.getProperty("user.dir") + Constant.FileConfig.CONF_DIR +"/log4j.properties");
+        logger =  LoggerFactory.getLogger(Test.class);;
+    }
+
+
     private  static ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public static void main(String[] args) {

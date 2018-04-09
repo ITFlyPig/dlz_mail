@@ -1,10 +1,13 @@
 package com.dlz.mail.db;
 
+import com.dlz.mail.Test;
 import com.dlz.mail.utils.Constant;
 import com.dlz.mail.utils.ExcelUtil;
 import com.dlz.mail.utils.Log;
 import com.dlz.mail.utils.TextUtil;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -14,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CSVResultHandler implements ResultSetHandler<String> {
+    private static final Logger logger = LoggerFactory.getLogger(CSVResultHandler.class);
+
     private String taskName;
 
     public CSVResultHandler(String taskName) {
@@ -24,10 +29,15 @@ public class CSVResultHandler implements ResultSetHandler<String> {
         //用查询的结果生成csv文件
         List<List<Object>> result = getDataList(rs);
         if (result == null || result.size() == 0){
-            Log.d("查询的结果转为List集合为空");
+            logger.debug("查询的结果转为List集合为空");
             return "";
         }
         String path = ExcelUtil.createExcelByPOI( System.getProperty("user.dir") + Constant.FileConfig.CSV_DIR, taskName, result);//创建文件
+        if (TextUtil.isEmpty(path)){
+            path = "";
+        }
+        logger.debug("文件的创建路径：" + path);
+
         if (TextUtil.isEmpty(path)){
             Log.d("文件创建失败");
             return "";
