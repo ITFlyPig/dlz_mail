@@ -43,7 +43,12 @@ public class EmailUtil {
         email.setAuthentication(mailConf.getUser(), mailConf.getPassword());
         try {
             email.addTo(recipients);
-            email.setFrom(mailConf.getUser());
+            if (TextUtil.isEmpty(mailConf.getUserName())){
+                email.setFrom(mailConf.getUser());//不带名称的
+            }else {
+                email.setFrom(mailConf.getUser(), mailConf.getUserName());//带名称
+            }
+
             if (TextUtil.isEmpty(subject)){
                 subject = "";
             }
@@ -69,6 +74,10 @@ public class EmailUtil {
                     if (TextUtil.isEmpty(fileName)){
                         fileName = "查询结果";
                     }
+
+                    //将附件的名称加上日期
+                    fileName = FileUtil.addTime(fileName);
+
                     attachment.setName(fileName);
                     email.attach(attachment);
 
@@ -115,7 +124,12 @@ public class EmailUtil {
         //email.setSSLOnConnect(true);
         //        email.setSSL(true);//commons-mail-1.1支持的方法，1.4中使用setSSLOnConnect(true)代替
         try {
-            email.setFrom(mailConf.getUser());
+            if (TextUtil.isEmpty(mailConf.getUserName())){
+                email.setFrom(mailConf.getUser());
+            }else {
+                email.setFrom(mailConf.getUser(), mailConf.getUserName());
+            }
+
             email.setSubject(subject);
             email.setMsg(content);
             email.addTo(toAddress);
@@ -165,7 +179,12 @@ public class EmailUtil {
                 htmlEmail.addCc(copyTos);
             }
             //摄者邮件的发送者
-            htmlEmail.setFrom(mailConf.getUser());
+            if (TextUtil.isEmpty(mailConf.getUserName())){
+                htmlEmail.setFrom(mailConf.getUser());
+            }else {
+                htmlEmail.setFrom(mailConf.getUser(), mailConf.getUserName());
+            }
+
             //设置邮件的接收
             if (recipients != null){
                 htmlEmail.addTo(recipients);

@@ -13,4 +13,15 @@ public class TimeUtil {
         Date date = new Date(time);
         return simpleDateFormat.format(date);
     }
+
+    /**
+     * 获取当前的时间
+     * @return
+     */
+    public static String getCurTime(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+        Date date = new Date(System.currentTimeMillis());
+        return simpleDateFormat.format(date);
+    }
+
 }

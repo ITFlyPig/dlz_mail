@@ -7,6 +7,7 @@ public class MailConfBean {
     private String port;
     private String user;
     private String password;
+    private String userName;
 
     public int getAuth() {
         return auth;
@@ -54,5 +55,13 @@ public class MailConfBean {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

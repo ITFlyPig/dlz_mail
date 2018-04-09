@@ -3,6 +3,7 @@ package com.dlz.mail.utils;
 
 import java.io.*;
 import java.nio.file.*;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -107,5 +108,25 @@ public class FileUtil {
         return fileName;
     }
 
+    /**
+     * 文件名称里面添加时间戳
+     * @param fileName
+     * @return
+     */
+    public static String addTime(String fileName){
+        if (TextUtil.isEmpty(fileName)){
+            return "";
+        }
+        if (fileName.contains(".")){//有后缀的
+            int index = fileName.lastIndexOf(".");
+            String nameWithTime = fileName.substring(0, index) + TimeUtil.getCurTime() ;
+            if (index + 1 < fileName.length()){
+                nameWithTime =  nameWithTime + fileName.substring(index + 1);
+            }
+            return nameWithTime;
+        }
+        return fileName + TimeUtil.getCurTime();//无后缀的
+
+    }
 
 }
