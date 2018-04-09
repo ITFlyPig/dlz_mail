@@ -43,7 +43,7 @@ public class CommonUtil {
                             logger.debug("endtime不一样");
                             return true;
                         }
-                        if (!timeEquals(mailTaskBean.getSend_time(), bean.getSend_time())){
+                        if (!strEquals(mailTaskBean.getSend_time(), bean.getSend_time())){
                             logger.debug("发送时间不一样");
                             return true;
                         }

@@ -1,15 +1,12 @@
 package com.dlz.mail.task;
 
-import com.dlz.mail.Job.EmailJob;
 import com.dlz.mail.bean.MailTaskBean;
 import com.dlz.mail.db.CSVResultHandler;
-import com.dlz.mail.db.CommonUtil;
 import com.dlz.mail.db.DBUtil;
-import com.dlz.mail.queue.TaskQueue;
-import com.dlz.mail.timer.QuartzManager;
 import com.dlz.mail.utils.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -24,164 +21,110 @@ import java.util.List;
 public class ExecuteSQL implements Runnable {
     private static final Logger logger = LogManager.getLogger(ExecuteSQL.class);
 
-    private TaskQueue mTaskQueue;//等待处理的任务队列
-    private boolean isStop;//表示线程是否结束
+    private String taskId;
 
-    public ExecuteSQL(TaskQueue taskQueue) {
-         mTaskQueue = taskQueue;
+    public ExecuteSQL(String taskId) {
+        this.taskId = taskId;
     }
 
     public void run() {
-        while (!isStop){
-            logger.debug("待执行的sql任务数：" + mTaskQueue.getSqlQueue().size());
-            MailTaskBean mailTaskBean = null;
+        //数据库查询任务
+        logger.debug("开始查询要执行的task");
+        ComboPooledDataSource dataSource = DBUtil.getDataSource();
+        QueryRunner queryRunner = new QueryRunner(dataSource);
+        List<MailTaskBean> tasks = null;
+        try {
+            tasks = queryRunner.query(Constant.SQL.GET_TASKS, new BeanListHandler<MailTaskBean>(MailTaskBean.class), taskId);
+        } catch (SQLException e) {
+            logger.debug("查询要执行的task异常");
+            e.printStackTrace();
+        }
+        if (tasks == null || tasks.size() == 0) {
+            logger.debug("查询到的任务为空");
+            return;
+        }
+
+        logger.debug("开始循环执行sql查询的任务");
+        for (MailTaskBean task : tasks) {
+            QueryRunner sqlRunner = new QueryRunner(dataSource);
             try {
-                mailTaskBean = mTaskQueue.getSqlQueue().take();
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            //判断任务是否应该丢弃
-            boolean isAbandon = CommonUtil.isShouldAbandonTask(mailTaskBean);
-            if (isAbandon){
-                logger.debug("放弃任务：" + mailTaskBean.getId());
-                continue;
-            }
-
-            if (mailTaskBean == null){
-                logger.debug("取出的待执行sql任务为空");
-                continue;
-            }
-            //检查邮件任务是否合格
-            boolean isOk = checkMailTask(mailTaskBean);
-            if (!isOk){
-                logger.debug("待处理的邮件任务不符合规范，放弃任务");
-                //TODO 给管理者发送邮件通知一声
-                return;
-            }
-
-            //所有任务都定时执行，执行完直接发送
-
-
-
-            //查询-------> 生成csv文件----->发送或者定时
-            ComboPooledDataSource dataSource = DBUtil.getDataSource();
-            QueryRunner queryRunner = new QueryRunner(dataSource);
-            try {
-                String result = queryRunner.query(mailTaskBean.sql, new CSVResultHandler(mailTaskBean.task_name, mailTaskBean.getSql_result_store()));
-                if (mailTaskBean.getSql_result_store() == Constant.SQL_RESULT_TYPE.CONTENT){
+                logger.debug("开始---"+ task.getTask_name() + "----任务的执行");
+                String result = sqlRunner.query(task.sql, new CSVResultHandler(task.task_name, task.getSql_result_store()));
+                if (task.getSql_result_store() == Constant.SQL_RESULT_TYPE.CONTENT) {
                     logger.debug("生成的html文件：" + result);
-                    mailTaskBean.setMailContent(result);
-                    handleExecutedTask(mailTaskBean);
-                }else {
+                    task.setMailContent(result);
+                    handleExecutedTask(task);
+                } else {
                     String path = handleZIP(result);//检查是否应该压缩
                     logger.debug("压缩处理后的文件路径：" + (path == null ? "" : path));
-                    if (!TextUtil.isEmpty(path)){//立即发送或者定时
-                        mailTaskBean.filePath = path;
-                        handleExecutedTask(mailTaskBean);
-                    }else {
-                        logger.debug("任务：" + mailTaskBean.task_name + " 创建csv失败");
+                    if (!TextUtil.isEmpty(path)) {//立即发送或者定时
+                        task.filePath = path;
+                        handleExecutedTask(task);
+                    } else {
+                        logger.debug("任务：" + task.task_name + " 创建csv失败");
                     }
                 }
 
             } catch (SQLException e) {
-                logger.debug("任务：" + mailTaskBean.task_name + " 执行sql查询失败");
+                logger.debug("任务：" + task.task_name + " 执行sql查询失败");
                 e.printStackTrace();
             }
+
+
         }
+
 
     }
 
-    private boolean checkMailTask(MailTaskBean mailTaskBean){
-        logger.debug("开始检查邮件任务是否合法");
-        if (mailTaskBean == null){
-            logger.debug("待处理的邮件任务为空");
-            return false;
-        }
-        if (mailTaskBean.send_time == null){
-            logger.debug("邮件的发送时间为空");
-            return false;
-        }
-        if (TextUtil.isEmpty(mailTaskBean.receptions)){
-            logger.debug("邮件的接收者为空");
-            return false;
-        }
-
-
-        return true;
-    }
 
     /**
      * 处理已经生成csv文件的任务
+     *
      * @param mailTaskBean
      */
-    private void handleExecutedTask(MailTaskBean mailTaskBean){
-        if (mailTaskBean == null){
+    private void handleExecutedTask(MailTaskBean mailTaskBean) {
+        if (mailTaskBean == null) {
             return;
         }
 
-        //判断任务是否应该丢弃
-        boolean isAbandon = CommonUtil.isShouldAbandonTask(mailTaskBean);
-        if (isAbandon){
-            logger.debug("放弃任务：ID:" + mailTaskBean.getId());
+        boolean result = false;
+        if (mailTaskBean.getEnd_time() == null){
+            result = sendEmail(mailTaskBean);
+        }else if (mailTaskBean.getEnd_time().getTime() > System.currentTimeMillis()){
+            result = sendEmail(mailTaskBean);
+
+        }else {
+            DBUtil.update(Constant.SQL.UPDATE_TASK_STATUS, Constant.EmailStatus.ABANDON, mailTaskBean.getId());
+            logger.debug("发送邮件的任务被丢弃：" + mailTaskBean.getTask_name());
             return;
         }
-
-        long curTime = System.currentTimeMillis();
-        long sendTime = mailTaskBean.send_time.getTime();
-        if ((mailTaskBean.end_time == null && curTime >= sendTime)//邮件没有截止日期，且已经到了发送的时间
-                ||
-                mailTaskBean.end_time != null && curTime >= sendTime && curTime < mailTaskBean.end_time.getTime()){//到了发送时间，但是还没到过期时间
-            //直接发送
-            logger.debug("立即发送邮件：" + mailTaskBean.getTask_name() );
-            boolean result = sendEmail(mailTaskBean);
-            logger.debug("邮件：" + mailTaskBean.getTask_name() + " 发送" + (result ? "成功" : "失败"));
-
-            int status = result ? Constant.EmailStatus.SEND_SUCCESS : Constant.EmailStatus.SEND_FAIL;
-            DBUtil.update(Constant.SQL.UPDATE_TASK_STATUS, status, mailTaskBean.getId());
-            return;
-
-        }
-
-        if (sendTime > curTime){//对发送任务定时并且写入到数据库
-            logger.debug("定时发送邮件：" + mailTaskBean.getTask_name() );
-            QuartzManager.addJob(mailTaskBean.getTask_name() + "邮件发送", String.valueOf(mailTaskBean.getId()), "send_email" + String.valueOf(mailTaskBean.getId()),EmailJob.class, mailTaskBean.generateSendEmailCron(), mTaskQueue);
-            DBUtil.update("update mail set filePath = ?, status = ?, mailContent = ? where id = ?", mailTaskBean.getFilePath(), Constant.EmailStatus.WAIT_SEND, mailTaskBean.getMailContent(),  mailTaskBean.getId());
-            return;
-        }
-        //丢弃这个任务
-        //TODO 对应丢弃的任务还得发送邮件通知管理员
-        EmailUtil.sendMail(mailTaskBean.getManagerEmail(), "邮件系统报警", "邮件任务被丢弃：" + mailTaskBean.getTask_name());
-        logger.debug("丢弃邮件任务：" + mailTaskBean.getTask_name() );
+        logger.debug("邮件发送结果：" + (result ? "成功" : "失败"));
+        int status = result ? Constant.EmailStatus.SEND_SUCCESS : Constant.EmailStatus.SEND_FAIL;
+        DBUtil.update(Constant.SQL.UPDATE_TASK_STATUS, status, mailTaskBean.getId());
 
     }
 
-    private boolean sendEmail(MailTaskBean mailTaskBean){
+    private boolean sendEmail(MailTaskBean mailTaskBean) {
 
-        //判断任务是否应该丢弃
-        boolean isAbandon = CommonUtil.isShouldAbandonTask(mailTaskBean);
-        if (isAbandon){
-            logger.debug("因为数据库有更新，所以放弃邮件任务");
-            return false;
-        }
+       logger.debug("开始发送邮件，任务为：" + mailTaskBean.getTask_name());
         List<String> paths = new ArrayList<>();
-        if (!TextUtil.isEmpty(mailTaskBean.filePath)){
+        if (!TextUtil.isEmpty(mailTaskBean.filePath)) {
             paths.add(mailTaskBean.filePath);
         }
 
-       return EmailUtil.sendSQLEmail(paths,
-               mailTaskBean.getSubject(), mailTaskBean.getMailContent(), mailTaskBean.parseReceptions(), mailTaskBean.parseCopyTos(), mailTaskBean.getSql_result_store());
+        return EmailUtil.sendSQLEmail(paths,
+                mailTaskBean.getSubject(), mailTaskBean.getMailContent(), mailTaskBean.parseReceptions(), mailTaskBean.parseCopyTos(), mailTaskBean.getSql_result_store());
 
     }
 
     /**
      * 压缩文件
+     *
      * @param filePath
      * @return
      */
-    private String handleZIP(String filePath){
-        if( FileUtil.shouldZIP(filePath)){
+    private String handleZIP(String filePath) {
+        if (FileUtil.shouldZIP(filePath)) {
             File srcFile = new File(filePath);
             File[] files = new File[]{srcFile};
 

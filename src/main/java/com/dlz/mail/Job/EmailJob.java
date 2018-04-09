@@ -74,12 +74,12 @@ public class EmailJob implements Job {
 
         long curTime = System.currentTimeMillis();
         boolean isSend = false;
-        Timestamp sendT = task.getSend_time();
+        Timestamp sendT = null;
         Timestamp endT = task.getEnd_time();
         if (endT == null && sendT != null){
             isSend = true;
         }else if (endT != null && sendT != null){
-            long sendTime = task.getSend_time().getTime();
+            long sendTime = 0;
             long endTime = task.getEnd_time().getTime();
             if (curTime >= sendTime &&  curTime < endTime && task.getStatus() == Constant.EmailStatus.WAIT_SEND){
                 isSend = true;

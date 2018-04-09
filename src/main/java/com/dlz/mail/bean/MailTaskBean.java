@@ -18,7 +18,7 @@ public class MailTaskBean {
     public int status;//表示邮件任务的状态 0：为执行sql 1：表示正在执行sql中 2：sql执行完成未定时   3：已定时  99：放弃这个任务
     public String sql;//sql语句
     public String cron;//cron定时表达式
-    public Timestamp send_time;//邮件发送时间
+    public String send_time;//邮件发送时间
     public Timestamp end_time;//邮件结束时间
     public Timestamp new_time;//邮件新建的时间
     public Timestamp excuteTime;//执行sql的时间
@@ -53,7 +53,7 @@ public class MailTaskBean {
         return cron;
     }
 
-    public Timestamp getSend_time() {
+    public String getSend_time() {
         return send_time;
     }
 
@@ -75,7 +75,7 @@ public class MailTaskBean {
         this.cron = cron;
     }
 
-    public void setSend_time(Timestamp send_time) {
+    public void setSend_time(String send_time) {
         this.send_time = send_time;
     }
 
@@ -166,7 +166,7 @@ public class MailTaskBean {
     }
 
     public Timestamp getExcuteTime() {
-        return send_time;
+        return excuteTime;
     }
 
     public void setExcuteTime(Timestamp excuteTime) {
@@ -214,7 +214,7 @@ public class MailTaskBean {
      * @return
      */
     public String generateSendEmailCron(){
-        return generateCron(getSend_time());
+        return "";
     }
 
     /**

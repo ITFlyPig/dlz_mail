@@ -118,6 +118,13 @@ public class TaskQueue {
 
         }
 
+    }
 
+    public synchronized void waitTask(){
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

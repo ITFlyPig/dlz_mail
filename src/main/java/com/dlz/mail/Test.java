@@ -31,7 +31,7 @@ public class Test {
     }
 
 
-    private  static ExecutorService executorService = Executors.newFixedThreadPool(5);
+    public  static ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public static void main(String[] args) {
 
@@ -47,11 +47,6 @@ public class Test {
         startGetTasks(taskQueue);//开始sql任务的查询
 
         startMonitorFile(taskQueue);//开始文件的检测
-
-        for (int i = 0; i < 1; i++){
-            ExecuteSQL executeSQL = new ExecuteSQL(taskQueue);
-            executorService.submit(executeSQL);
-        }
 
     }
 

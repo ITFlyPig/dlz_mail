@@ -147,10 +147,10 @@ public class ExcelUtil {
 
             logger.debug("调整宽度开始" );
             //自动调整每一列的宽度
-            for (int i = 0; i < columNum; i++){
-                logger.debug("调整列：" + i );
-                sheet.autoSizeColumn(i);
-            }
+//            for (int i = 0; i < columNum; i++){
+//                logger.debug("调整列：" + i );
+//                sheet.autoSizeColumn(i);
+//            }
             logger.debug("调整宽度结束" );
 
 

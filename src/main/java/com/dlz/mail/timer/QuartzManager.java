@@ -6,6 +6,8 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import java.util.Calendar;
 
+import static com.dlz.mail.utils.Constant.Key.TASK_NAME;
+
 /**
  * 定时任务的管理类
  */
@@ -36,6 +38,7 @@ public class QuartzManager {
             JobDataMap jobDataMap = jobDetail.getJobDataMap();
             jobDataMap.put("email_task_id", emailTaskId);
             jobDataMap.put("jobName", jobName);
+            jobDataMap.put(TASK_NAME, jobName);
             if (obj != null){
                 jobDataMap.put("obj", obj);
             }
