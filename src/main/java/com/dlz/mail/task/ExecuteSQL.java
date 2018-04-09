@@ -3,6 +3,7 @@ package com.dlz.mail.task;
 import com.dlz.mail.bean.MailTaskBean;
 import com.dlz.mail.db.CSVResultHandler;
 import com.dlz.mail.db.DBUtil;
+import com.dlz.mail.timer.QuartzManager;
 import com.dlz.mail.utils.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
@@ -96,6 +97,10 @@ public class ExecuteSQL implements Runnable {
         }else {
             DBUtil.update(Constant.SQL.UPDATE_TASK_STATUS, Constant.EmailStatus.ABANDON, mailTaskBean.getId());
             logger.debug("发送邮件的任务被丢弃：" + mailTaskBean.getTask_name());
+
+            //删除已经被丢弃的任务的定时器
+            logger.debug("删除已放弃的任务的定时器：" + mailTaskBean.getTask_name());
+            QuartzManager.removeJob(mailTaskBean.getTask_name() + "sql执行", "excute_sql" + String.valueOf(mailTaskBean.getId()));
             return;
         }
         logger.debug("邮件发送结果：" + (result ? "成功" : "失败"));
