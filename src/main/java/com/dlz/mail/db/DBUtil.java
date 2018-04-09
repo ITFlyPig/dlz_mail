@@ -1,9 +1,12 @@
 package com.dlz.mail.db;
 
+import com.dlz.mail.bean.MailTaskBean;
 import com.dlz.mail.utils.Log;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mysql.cj.jdbc.PreparedStatement;
 import org.apache.commons.dbutils.QueryRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyVetoException;
 import java.io.*;
@@ -16,13 +19,14 @@ import java.util.Properties;
  * 获得操作数据的dataSource
  */
 public class DBUtil {
+    private static final Logger logger = LoggerFactory.getLogger(DBUtil.class);
     private static ComboPooledDataSource dataSource;
 
     static {
         dataSource = new ComboPooledDataSource();
         Properties props = new Properties();
         String root = System.getProperty("user.dir");
-        Log.d("获取到的root:" + root);
+        logger.debug("获取到的root:" + root);
 
         try {
             InputStream in = new BufferedInputStream(new FileInputStream(root + "/conf/db.properties"));
@@ -39,7 +43,7 @@ public class DBUtil {
         String user = props.getProperty("db.user");
         String passsord = props.getProperty("db.pwd");
 
-        Log.d("driver:" + driver + " url:" + url + " user:" + user + " passsord:" + passsord);
+        logger.debug("driver:" + driver + " url:" + url + " user:" + user + " passsord:" + passsord);
 
         try {
             dataSource.setDriverClass(driver);

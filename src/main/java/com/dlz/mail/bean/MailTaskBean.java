@@ -1,14 +1,19 @@
 package com.dlz.mail.bean;
 
 import com.dlz.mail.Test;
+import com.dlz.mail.db.CSVResultHandler;
 import com.dlz.mail.utils.Log;
 import com.dlz.mail.utils.TextUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
 public class MailTaskBean {
+    private static final Logger logger = LoggerFactory.getLogger(MailTaskBean.class);
+
     public int id;
     public int status;//表示邮件任务的状态 0：为执行sql 1：表示正在执行sql中 2：sql执行完成未定时   3：已定时  99：放弃这个任务
     public String sql;//sql语句
@@ -183,14 +188,14 @@ public class MailTaskBean {
      */
     public String generateCron(Timestamp timestamp){
         if (timestamp == null){
-            Log.d("生成cron表达式失败");
+            logger.debug("生成cron表达式失败");
             return "";
         }else {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(timestamp);
             String cron = calendar.get(Calendar.SECOND)  + " "+ calendar.get(Calendar.MINUTE) + " "+ calendar.get(Calendar.HOUR_OF_DAY)+ " "+ calendar.get(Calendar.DAY_OF_MONTH)
                     +" "+ (calendar.get(Calendar.MONTH) + 1)+ " "+ "?" + " " + calendar.get(Calendar.YEAR);
-            Log.d("生成的定时执行的cron表达式：" + cron);
+            logger.debug("生成的定时执行的cron表达式：" + cron);
             return cron;
         }
     }

@@ -1,10 +1,13 @@
 package com.dlz.mail.timer;
 
+import com.dlz.mail.task.MonitorTask;
 import com.dlz.mail.utils.Log;
 import com.dlz.mail.utils.TextUtil;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.triggers.CronTriggerImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
@@ -13,7 +16,7 @@ import java.util.Date;
  */
 public class CronTriggerUtil {
 
-
+    private static final Logger logger = LoggerFactory.getLogger(CronTriggerUtil.class);
     /**
      * @param job
      * @param cronExpre
@@ -56,22 +59,22 @@ public class CronTriggerUtil {
      * @return
      */
     public static boolean isValidExpression(final String cronExpression){
-        Log.d("开始检查cron表达式是否合法");
+        logger.debug("开始检查cron表达式是否合法");
         CronTriggerImpl trigger = new CronTriggerImpl();
         try {
             trigger.setCronExpression(cronExpression);
             Date date = trigger.computeFirstFireTime(null);
             boolean isOK = date != null;
             if (isOK){
-                Log.d("cron表达式合法");
+                logger.debug("cron表达式合法");
             }else {
-                Log.d("cron表达式不合法");
+                logger.debug("cron表达式不合法");
             }
             return isOK;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.d("cron表达式不符合规范" );
+        logger.debug("cron表达式不符合规范" );
         return false;
     }
 

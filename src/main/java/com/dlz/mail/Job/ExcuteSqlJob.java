@@ -3,7 +3,6 @@ package com.dlz.mail.Job;
 import com.dlz.mail.bean.MailTaskBean;
 import com.dlz.mail.db.DBUtil;
 import com.dlz.mail.queue.TaskQueue;
-import com.dlz.mail.task.GetTasks;
 import com.dlz.mail.utils.Constant;
 import com.dlz.mail.utils.Log;
 import com.dlz.mail.utils.TextUtil;
@@ -14,12 +13,15 @@ import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.List;
 
 //执行sql查询的job
 public class ExcuteSqlJob implements Job {
+    private static final Logger logger = LoggerFactory.getLogger(ExcuteSqlJob.class);
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
@@ -27,11 +29,11 @@ public class ExcuteSqlJob implements Job {
         String jobName = dataMap.getString(Constant.Key.TASK_NAME);
         TaskQueue taskQueue = (TaskQueue) dataMap.get("obj");
         if (TextUtil.isEmpty(emailTaskId)) {
-            Log.d("id为空，放弃定时任务的执行");
+            logger.debug("id为空，放弃定时任务的执行");
             return;
         }
 
-        Log.d("开始定时任务的执行：" + emailTaskId + (jobName == null ? "" : jobName));
+        logger.debug("开始定时任务的执行：" + emailTaskId + (jobName == null ? "" : jobName));
         //据id查询对应的邮件发送任务
         ComboPooledDataSource dataSource = DBUtil.getDataSource();
         QueryRunner queryRunner = new QueryRunner(dataSource);
@@ -40,10 +42,10 @@ public class ExcuteSqlJob implements Job {
             tasks = queryRunner.query(Constant.SQL.GET_TASKS, new BeanListHandler<MailTaskBean>(MailTaskBean.class), emailTaskId);
         } catch (SQLException e) {
             e.printStackTrace();
-            Log.e("定时任务失败，任务id为----" + emailTaskId + " \n" + e.getLocalizedMessage());
+            logger.error("定时任务失败，任务id为----" + emailTaskId + " \n" + e.getLocalizedMessage());
         }
         if (tasks == null || tasks.size() == 0) {
-            Log.d("定时任务失败，任务id为----" + emailTaskId + " 查询数据库对应的任务为空");
+            logger.debug("定时任务失败，任务id为----" + emailTaskId + " 查询数据库对应的任务为空");
             return;
         }
 

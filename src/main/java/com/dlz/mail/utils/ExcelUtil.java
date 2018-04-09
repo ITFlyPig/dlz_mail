@@ -31,7 +31,7 @@ public class ExcelUtil {
      */
     public static String createExcel(String outPutPath, String fileName, List<List<Object>> data) {
         if (TextUtil.isEmpty(outPutPath) || TextUtil.isEmpty(fileName) || data == null) {
-            Log.d(TAG, "创建Excel失败， 文件的输出路径为空，或者查询到的内容为空");
+            logger.debug("创建Excel失败， 文件的输出路径为空，或者查询到的内容为空");
             return "";
         }
         File file = new File(outPutPath + File.separator + fileName + ".xls");
@@ -44,10 +44,10 @@ public class ExcelUtil {
                 file.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.d(TAG, "缓存文件创建失败");
+                logger.debug( "缓存文件创建失败");
             }
         }
-        Log.d(TAG, "缓存文件的位置：" + file.getAbsolutePath());
+        logger.debug("缓存文件的位置：" + file.getAbsolutePath());
         OutputStream os;
         try {
             os = new FileOutputStream(file);
@@ -145,11 +145,13 @@ public class ExcelUtil {
                 }
             }
 
-            logger.debug("调整宽度" );
+            logger.debug("调整宽度开始" );
             //自动调整每一列的宽度
             for (int i = 0; i < columNum; i++){
+                logger.debug("调整列：" + i );
                 sheet.autoSizeColumn(i);
             }
+            logger.debug("调整宽度结束" );
 
 
 
@@ -159,35 +161,46 @@ public class ExcelUtil {
             logger.debug(e.getLocalizedMessage());
         }
 
-
+        logger.debug("将数据生成文件开始：outPutPath：" + outPutPath + " fileName：" + fileName );
         //第六步将生成excel文件保存到指定路径下
         try {
             String fileStr = outPutPath + File.separator + fileName + ".xls";
-            Log.d("创建的文件的路劲：" + fileStr);
+            logger.debug("创建的文件的路劲：" + fileStr);
 
             File file = new File(fileStr);
             File parent = file.getParentFile();
+            logger.debug("开始检测文件的父文件夹是否存在");
             if (!parent.exists()) {
+                logger.debug("不存在，开始创建文件的父文件夹");
                 parent.mkdirs();
+            }else {
+                logger.debug("父文件夹存在");
             }
+            logger.debug("开始检测文件是否存在");
             if (!file.exists()) {
                 try {
+                    logger.debug("不存在，开始创建文件");
                     file.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
                     logger.debug( "缓存文件创建失败");
                 }
+            }else {
+                logger.debug("文件存在");
             }
 
+            logger.debug("文件创建成功");
 
             FileOutputStream fout = new FileOutputStream(file);
             wb.write(fout);
             wb.close();
             fout.close();
+            logger.debug("文件写入成功");
             return fileStr;
         } catch (IOException e) {
             e.printStackTrace();
             logger.debug(e.getLocalizedMessage());
+            logger.debug("文件写入异常");
         }
 
         return "";

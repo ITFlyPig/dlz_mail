@@ -1,8 +1,11 @@
 package com.dlz.mail.task;
 
+import com.dlz.mail.Job.ExcuteSqlJob;
 import com.dlz.mail.utils.Constant;
 import com.dlz.mail.utils.Log;
 import com.dlz.mail.utils.TextUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.*;
@@ -12,6 +15,7 @@ import java.util.List;
  * 文件变化监听的类
  */
 public class MonitorTask implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(MonitorTask.class);
     private boolean EXITS;
     private String mPath;
     private FileChangeListener mFileChangeListener;
@@ -36,7 +40,7 @@ public class MonitorTask implements Runnable {
         if (file == null || !file.exists()){
             return;
         }
-        Log.d("开始监听文件：" + filePath);
+        logger.debug("开始监听文件：" + filePath);
         Path sqlMonitorPath = Paths.get(filePath);
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
@@ -44,7 +48,7 @@ public class MonitorTask implements Runnable {
                     StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
 
             while (!EXITS) {
-                Log.d( "SQL文件的监听");
+                logger.debug( "SQL文件的监听");
                 WatchKey watckKey = watcher.take();
                 List<WatchEvent<?>> events = watckKey.pollEvents();
                 for (WatchEvent event : events) {

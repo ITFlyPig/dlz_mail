@@ -31,7 +31,7 @@ public class ExecuteSQL implements Runnable {
 
     public void run() {
         while (!isStop){
-            Log.d("待执行的sql任务数：" + mTaskQueue.getSqlQueue().size());
+            logger.debug("待执行的sql任务数：" + mTaskQueue.getSqlQueue().size());
             MailTaskBean mailTaskBean = null;
             try {
                 mailTaskBean = mTaskQueue.getSqlQueue().take();
@@ -82,7 +82,7 @@ public class ExecuteSQL implements Runnable {
     }
 
     private boolean checkMailTask(MailTaskBean mailTaskBean){
-        Log.d("开始检查邮件任务是否合法");
+        logger.debug("开始检查邮件任务是否合法");
         if (mailTaskBean == null){
             logger.debug("待处理的邮件任务为空");
             return false;

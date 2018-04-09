@@ -20,7 +20,7 @@ public class ZipFileUtil {
      * @param zipFilePath 压缩后的zip文件路径   ,如"D:/test/aa.zip";
      */
     public static void compressFiles2Zip(File[] files, String zipFilePath) {
-        Log.d("开始压缩文件：zip文件的路径：" + zipFilePath);
+        logger.debug("开始压缩文件：zip文件的路径：" + zipFilePath);
         if(files != null && files.length >0) {
             if(isEndsWithZip(zipFilePath)) {
                 ZipArchiveOutputStream zaos = null;
@@ -75,7 +75,7 @@ public class ZipFileUtil {
             }
 
         }
-        Log.d("文件压缩失败");
+        logger.debug("文件压缩失败");
 
     }
 

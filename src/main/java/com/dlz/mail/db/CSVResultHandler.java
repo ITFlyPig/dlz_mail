@@ -34,12 +34,12 @@ public class CSVResultHandler implements ResultSetHandler<String> {
         }
         String path = ExcelUtil.createExcelByPOI( System.getProperty("user.dir") + Constant.FileConfig.CSV_DIR, taskName, result);//创建文件
         if (TextUtil.isEmpty(path)){
-            path = "";
+            path = " ";
         }
         logger.debug("文件的创建路径：" + path);
 
         if (TextUtil.isEmpty(path)){
-            Log.d("文件创建失败");
+            logger.debug("文件创建失败");
             return "";
         }
         return path;

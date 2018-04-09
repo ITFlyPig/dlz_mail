@@ -1,7 +1,10 @@
 package com.dlz.mail.utils;
 
 import com.dlz.mail.bean.MailConfBean;
+import com.dlz.mail.timer.CronTriggerUtil;
 import org.apache.commons.mail.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
@@ -11,6 +14,7 @@ import java.io.*;
  *
  */
 public class EmailUtil {
+    private static final Logger logger = LoggerFactory.getLogger(EmailUtil.class);
 
     public static MailConfBean mailConf;
 
@@ -26,9 +30,10 @@ public class EmailUtil {
      */
     public static boolean sendAttachmentEmail(String attachmentPath,
                                               String subject, String content, String[] recipients, String[] copyTos){
+        logger.debug("开始发送带附件的邮件");
 
         if (mailConf == null){
-            Log.d("发件人邮件的配置为空");
+            logger.debug("发件人邮件的配置为空，返回");
             return false;
         }
 
@@ -64,9 +69,12 @@ public class EmailUtil {
             if (copyTos != null && copyTos.length > 0){
                 email.addCc(copyTos);
             }
+            logger.debug("发送");
             email.send();
+            logger.debug("发送成功");
             return true;
         } catch (EmailException e) {
+            logger.debug("邮件发送异常");
             e.printStackTrace();
         }
         return false;
@@ -79,9 +87,9 @@ public class EmailUtil {
      * @param content
      */
     public static boolean sendMail(String toAddress, String subject, String content){
-        Log.d("开始发送简单邮件");
+        logger.debug("开始发送简单邮件");
         if (mailConf == null){
-            Log.d("发件人邮件的配置为空");
+            logger.debug("发件人邮件的配置为空");
             return false;
         }
         if (subject == null){
@@ -101,11 +109,12 @@ public class EmailUtil {
             email.setSubject(subject);
             email.setMsg(content);
             email.addTo(toAddress);
+            logger.debug("开始发送");
             email.send();
-            Log.d("邮件发送成功，接收人：" + toAddress);
+            logger.debug("邮件发送成功，接收人：" + toAddress);
             return true;
         } catch (EmailException e) {
-            Log.d(e.getLocalizedMessage());
+            logger.debug("邮件发送异常：" + e.getLocalizedMessage());
             e.printStackTrace();
         }
         return false;
