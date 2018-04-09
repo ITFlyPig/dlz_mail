@@ -56,4 +56,11 @@ public class Constant {
 		String TASK_NAME = "task_name";
 	}
 
+	/**
+	 * sql查询的结果放在邮件的哪里
+	 */
+	public interface SQL_RESULT_TYPE{
+		int CONTENT = 0;//放在邮件的内容
+		int ATTACMENT = 1;//放在邮件的附件中
+	}
 }

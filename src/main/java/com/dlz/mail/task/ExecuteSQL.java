@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 从任务队列中取出sql任务来执行，然后生成csv文件，最后放入邮件发送队列
@@ -59,20 +61,30 @@ public class ExecuteSQL implements Runnable {
                 return;
             }
 
+            //所有任务都定时执行，执行完直接发送
+
+
+
             //查询-------> 生成csv文件----->发送或者定时
             ComboPooledDataSource dataSource = DBUtil.getDataSource();
             QueryRunner queryRunner = new QueryRunner(dataSource);
             try {
-                String path = queryRunner.query(mailTaskBean.sql, new CSVResultHandler(mailTaskBean.task_name));
-                path = handleZIP(path);//检查是否应该压缩
-                logger.debug("压缩处理后的文件路径：" + (path == null ? "" : path));
-
-                if (!TextUtil.isEmpty(path)){//立即发送或者定时
-                    mailTaskBean.filePath = path;
+                String result = queryRunner.query(mailTaskBean.sql, new CSVResultHandler(mailTaskBean.task_name, mailTaskBean.getSql_result_store()));
+                if (mailTaskBean.getSql_result_store() == Constant.SQL_RESULT_TYPE.CONTENT){
+                    logger.debug("生成的html文件：" + result);
+                    mailTaskBean.setMailContent(result);
                     handleExecutedTask(mailTaskBean);
                 }else {
-                    logger.debug("任务：" + mailTaskBean.task_name + " 创建csv失败");
+                    String path = handleZIP(result);//检查是否应该压缩
+                    logger.debug("压缩处理后的文件路径：" + (path == null ? "" : path));
+                    if (!TextUtil.isEmpty(path)){//立即发送或者定时
+                        mailTaskBean.filePath = path;
+                        handleExecutedTask(mailTaskBean);
+                    }else {
+                        logger.debug("任务：" + mailTaskBean.task_name + " 创建csv失败");
+                    }
                 }
+
             } catch (SQLException e) {
                 logger.debug("任务：" + mailTaskBean.task_name + " 执行sql查询失败");
                 e.printStackTrace();
@@ -135,7 +147,7 @@ public class ExecuteSQL implements Runnable {
         if (sendTime > curTime){//对发送任务定时并且写入到数据库
             logger.debug("定时发送邮件：" + mailTaskBean.getTask_name() );
             QuartzManager.addJob(mailTaskBean.getTask_name() + "邮件发送", String.valueOf(mailTaskBean.getId()), "send_email" + String.valueOf(mailTaskBean.getId()),EmailJob.class, mailTaskBean.generateSendEmailCron(), mTaskQueue);
-            DBUtil.update("update mail set filePath = ?, status = ? where id = ?", mailTaskBean.getFilePath(), Constant.EmailStatus.WAIT_SEND, mailTaskBean.getId());
+            DBUtil.update("update mail set filePath = ?, status = ?, mailContent = ? where id = ?", mailTaskBean.getFilePath(), Constant.EmailStatus.WAIT_SEND, mailTaskBean.getMailContent(),  mailTaskBean.getId());
             return;
         }
         //丢弃这个任务
@@ -153,8 +165,13 @@ public class ExecuteSQL implements Runnable {
             logger.debug("因为数据库有更新，所以放弃邮件任务");
             return false;
         }
-       return EmailUtil.sendAttachmentEmail(mailTaskBean.filePath,
-               mailTaskBean.getSubject(), mailTaskBean.getMailContent(), mailTaskBean.parseReceptions(), mailTaskBean.parseCopyTos());
+        List<String> paths = new ArrayList<>();
+        if (!TextUtil.isEmpty(mailTaskBean.filePath)){
+            paths.add(mailTaskBean.filePath);
+        }
+
+       return EmailUtil.sendSQLEmail(paths,
+               mailTaskBean.getSubject(), mailTaskBean.getMailContent(), mailTaskBean.parseReceptions(), mailTaskBean.parseCopyTos(), mailTaskBean.getSql_result_store());
 
     }
 

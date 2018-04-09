@@ -27,7 +27,7 @@ public class Test {
 
     static {
         PropertyConfigurator.configure( System.getProperty("user.dir") + Constant.FileConfig.CONF_DIR +"/log4j.properties");
-        logger =  LoggerFactory.getLogger(Test.class);;
+        logger = LoggerFactory.getLogger(Test.class);
     }
 
 
@@ -37,7 +37,7 @@ public class Test {
 
         MailConfBean mailConfBean = getSendMail();
         if (mailConfBean == null){
-            Log.d("邮件发送者为空，结束程序");
+            logger.debug("邮件发送者为空，结束程序");
             return;
         }
         EmailUtil.mailConf = mailConfBean;
@@ -62,7 +62,7 @@ public class Test {
      * @return
      */
     private static MailConfBean getSendMail()  {
-        Log.d("开始从数据库查询邮件发送者的邮件配置");
+        logger.debug("开始从数据库查询邮件发送者的邮件配置");
         ComboPooledDataSource dataSource = DBUtil.getDataSource();
         QueryRunner queryRunner = new QueryRunner(dataSource);
         List<MailConfBean> mailConfBeans = null;
@@ -70,13 +70,13 @@ public class Test {
             mailConfBeans = queryRunner.query(Constant.SQL.GET_SEND_MAIL, new BeanListHandler<MailConfBean>(MailConfBean.class));
         } catch (SQLException e) {
             e.printStackTrace();
-            Log.d("查询邮件发送者的邮件配置出现异常");
+            logger.debug("查询邮件发送者的邮件配置出现异常");
         }
         if (mailConfBeans != null && mailConfBeans.size() > 0) {
-            Log.d("查询邮件发送者的邮件配置成功");
+            logger.debug("查询邮件发送者的邮件配置成功");
             return mailConfBeans.get(0);
         }
-        Log.d("查询邮件发送者的邮件配置失败");
+        logger.debug("查询邮件发送者的邮件配置失败");
         return null;
     }
 
@@ -114,7 +114,7 @@ public class Test {
 
             @Override
             public void onModify(String path) {
-                Log.d("唤醒查询sql任务的线程");
+                logger.debug("唤醒查询sql任务的线程");
                 taskQueue.startGetSQlTasks();//唤醒查询sql任务的线程
 
             }

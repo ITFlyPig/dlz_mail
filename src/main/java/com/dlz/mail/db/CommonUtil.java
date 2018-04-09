@@ -6,12 +6,15 @@ import com.dlz.mail.utils.TextUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
 public class CommonUtil {
+    private static final Logger logger = LogManager.getLogger(CommonUtil.class);
     /**
      * 是否应该放弃当前的任务
      * 放弃的情况：
@@ -32,34 +35,36 @@ public class CommonUtil {
                 for (MailTaskBean  mailTaskBean : tasks){
                     if (!timeEquals(mailTaskBean.getUpdate_time(), bean.getUpdate_time())){//更新的时间不相等在判断需要的字段值是否相等
                         if (!strEquals(mailTaskBean.getSql(), bean.getSql())){
+                            logger.debug("sql语句不一样");
                             return true;
                         }
 
-                        if (!timeEquals(mailTaskBean.getExcuteTime(), bean.getExcuteTime())){
-                            return true;
-                        }
                         if (!timeEquals(mailTaskBean.getEnd_time(), bean.getEnd_time())){
+                            logger.debug("endtime不一样");
                             return true;
                         }
                         if (!timeEquals(mailTaskBean.getSend_time(), bean.getSend_time())){
+                            logger.debug("发送时间不一样");
                             return true;
                         }
                         if (!strEquals(mailTaskBean.getTask_name(), bean.getTask_name())){
-                            return true;
-                        }
-                        if (!strEquals(mailTaskBean.getMailContent(), bean.getMailContent())){
+                            logger.debug("task_name不一样");
                             return true;
                         }
                         if (!strEquals(mailTaskBean.getManagerEmail(), bean.getManagerEmail())){
+                            logger.debug("管理者邮件不一样");
                             return true;
                         }
                         if (!strEquals(mailTaskBean.getSubject(), bean.getSubject())){
+                            logger.debug("邮件主题不一样");
                             return true;
                         }
                         if (!strEquals(mailTaskBean.getCopy_to_mails(), bean.getCopy_to_mails())){
+                            logger.debug("抄送者不一样");
                             return true;
                         }
                         if (!strEquals(mailTaskBean.getReceptions(), bean.getReceptions())){
+                            logger.debug("接受者邮件不一样");
                             return true;
                         }
 

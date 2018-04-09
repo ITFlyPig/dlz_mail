@@ -6,25 +6,24 @@ import com.dlz.mail.db.CommonUtil;
 import com.dlz.mail.db.DBUtil;
 import com.dlz.mail.utils.Constant;
 import com.dlz.mail.utils.EmailUtil;
-import com.dlz.mail.utils.Log;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 /**
  * 邮件定时发送的任务
  */
 public class EmailJob implements Job {
-    private static final Logger logger = LoggerFactory.getLogger(CSVResultHandler.class);
+    private static final Logger logger = LogManager.getLogger(CSVResultHandler.class);
 
 
     @Override
@@ -87,8 +86,10 @@ public class EmailJob implements Job {
             }
         }
         if (isSend){
-            boolean result = EmailUtil.sendAttachmentEmail(task.filePath,  task.getSubject(),
-                    task.getMailContent(), task.parseReceptions(), task.parseCopyTos());
+            ArrayList<String> paths = new ArrayList<>();
+            paths.add(task.filePath);
+            boolean result = EmailUtil.sendSQLEmail(paths,  task.getSubject(),
+                    task.getMailContent(), task.parseReceptions(), task.parseCopyTos(), task.getSql_result_store());
             //对于已发送的邮件，更新状态
             logger.debug("邮件：" + task.getTask_name() + " 发送" + (result ? "成功" : "失败"));
             if (result){

@@ -34,6 +34,8 @@ public class MailTaskBean {
     public String mailContent;//邮件的内容
     public String managerEmail;//管理员的邮件
 
+    public int sql_result_store;//sql查询的结果在邮件中的形式： 0：放在内容   1：放在附件
+
 
     public Timestamp getUpdate_time() {
         return update_time;
@@ -172,6 +174,13 @@ public class MailTaskBean {
     }
 
 
+    public int getSql_result_store() {
+        return sql_result_store;
+    }
+
+    public void setSql_result_store(int sql_result_store) {
+        this.sql_result_store = sql_result_store;
+    }
 
     /**
      * 生成执行sql的表达式
