@@ -13,9 +13,8 @@ import java.util.List;
 public class FileUtil {
     private static final String TAG = "FileUtil";
 
-//    private static int ZIP_SIZE = 2 * 1024 * 1024;//文件大小超过2M就进行压缩
+    private static int ZIP_SIZE = 2 * 1024 * 1024;//文件大小超过2M就进行压缩
 
-    private static int ZIP_SIZE = 1;//文件大小超过2M就进行压缩
 
 
 
@@ -120,8 +119,8 @@ public class FileUtil {
         if (fileName.contains(".")){//有后缀的
             int index = fileName.lastIndexOf(".");
             String nameWithTime = fileName.substring(0, index) + TimeUtil.getCurTime() ;
-            if (index + 1 < fileName.length()){
-                nameWithTime =  nameWithTime + fileName.substring(index + 1);
+            if (index < fileName.length()){
+                nameWithTime =  nameWithTime + fileName.substring(index);
             }
             return nameWithTime;
         }
