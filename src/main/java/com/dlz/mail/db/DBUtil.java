@@ -52,9 +52,12 @@ public class DBUtil {
                 if (isEncrypt.equalsIgnoreCase("1")) {//加密过的，需要解密
                     passsord = DesUtil.getInstance().decrypt(passsord);
                 } else {//没加密，则加密更新
+                    OutputStream out = new BufferedOutputStream(new FileOutputStream(root + "/conf/db.properties"));
                     String encryptPwd = DesUtil.getInstance().encrypt(passsord);
                     props.setProperty("db.pwd.encrypted", "1");
                     props.setProperty("db.pwd", encryptPwd);
+                    props.store(out, " update");
+                    out.close();
 
                 }
 
