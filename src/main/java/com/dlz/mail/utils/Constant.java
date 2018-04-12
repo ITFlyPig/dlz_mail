@@ -64,4 +64,9 @@ public class Constant {
 		int CONTENT = 0;//放在邮件的内容
 		int ATTACMENT = 1;//放在邮件的附件中
 	}
+
+	/**
+	 * 加密和解密的key
+	 */
+	public static final String EncryptDecryptKEY = "e852ec0ff77250be497389d2f5a1818c18bb66106b9905c4ee26fe0d256eb3b77e0ce9a28a84e4b67e4332ba37ec3aa7518148e3a682318c0fc34c391f45c201";
 }

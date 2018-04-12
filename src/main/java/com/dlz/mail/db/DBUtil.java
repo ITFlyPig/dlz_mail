@@ -1,10 +1,13 @@
 package com.dlz.mail.db;
 
 import com.dlz.mail.bean.MailTaskBean;
+import com.dlz.mail.utils.DesUtil;
 import com.dlz.mail.utils.Log;
+import com.dlz.mail.utils.TextUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mysql.cj.jdbc.PreparedStatement;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +22,7 @@ import java.util.Properties;
  * 获得操作数据的dataSource
  */
 public class DBUtil {
-    private static final Logger logger = LoggerFactory.getLogger(DBUtil.class);
+    private static final org.apache.log4j.Logger logger = LogManager.getLogger(DBUtil.class);
     private static ComboPooledDataSource dataSource;
 
     static {
@@ -42,8 +45,26 @@ public class DBUtil {
         String url = props.getProperty("db.url");
         String user = props.getProperty("db.user");
         String passsord = props.getProperty("db.pwd");
+        String isEncrypt = props.getProperty("db.pwd.encrypted");
 
-        logger.debug("driver:" + driver + " url:" + url + " user:" + user + " passsord:" + passsord);
+        try {
+            if (!TextUtil.isEmpty(isEncrypt)) {
+                if (isEncrypt.equalsIgnoreCase("1")) {//加密过的，需要解密
+                    passsord = DesUtil.getInstance().decrypt(passsord);
+                } else {//没加密，则加密更新
+                    String encryptPwd = DesUtil.getInstance().encrypt(passsord);
+                    props.setProperty("db.pwd.encrypted", "1");
+                    props.setProperty("db.pwd", encryptPwd);
+
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.debug("密码加解密异常：" + e.getLocalizedMessage());
+        }
+
+        logger.debug("driver:" + driver + " url:" + url + " user:" + user);
 
         try {
             dataSource.setDriverClass(driver);
@@ -56,7 +77,7 @@ public class DBUtil {
 
     }
 
-    public static ComboPooledDataSource getDataSource(){
+    public static ComboPooledDataSource getDataSource() {
         return dataSource;
 
     }
@@ -66,10 +87,11 @@ public class DBUtil {
     public static Connection getConn() {
         try {
             return dataSource.getConnection();
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
     // 关闭链接
     public static void close(Connection conn) throws SQLException {
         if (conn != null) {
@@ -83,22 +105,24 @@ public class DBUtil {
     }
 
     public static void close(PreparedStatement pstate) throws SQLException {
-        if(pstate!=null){
+        if (pstate != null) {
             pstate.close();
         }
     }
+
     public static void close(ResultSet rs) throws SQLException {
-        if(rs!=null){
+        if (rs != null) {
             rs.close();
         }
     }
 
     /**
      * 更新
+     *
      * @param sql
      * @param params
      */
-    public static boolean update(String sql, Object... params){
+    public static boolean update(String sql, Object... params) {
         ComboPooledDataSource dataSource = DBUtil.getDataSource();
         QueryRunner queryRunner = new QueryRunner(dataSource);
         try {

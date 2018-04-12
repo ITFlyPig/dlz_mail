@@ -8,6 +8,7 @@ public class MailConfBean {
     private String user;
     private String password;
     private String userName;
+    private int pwdEncrypt;
 
     public int getAuth() {
         return auth;
@@ -63,5 +64,13 @@ public class MailConfBean {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public int getPwdEncrypt() {
+        return pwdEncrypt;
+    }
+
+    public void setPwdEncrypt(int pwdEncrypt) {
+        this.pwdEncrypt = pwdEncrypt;
     }
 }

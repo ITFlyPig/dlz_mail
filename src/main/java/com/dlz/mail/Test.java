@@ -8,6 +8,7 @@ import com.dlz.mail.task.ExecuteSQL;
 import com.dlz.mail.task.GetTasks;
 import com.dlz.mail.task.MonitorTask;
 import com.dlz.mail.utils.Constant;
+import com.dlz.mail.utils.DesUtil;
 import com.dlz.mail.utils.EmailUtil;
 import com.dlz.mail.utils.Log;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -69,7 +70,28 @@ public class Test {
         }
         if (mailConfBeans != null && mailConfBeans.size() > 0) {
             logger.debug("查询邮件发送者的邮件配置成功");
-            return mailConfBeans.get(0);
+
+            //处理密码加解密
+            MailConfBean mailConfBean = mailConfBeans.get(0);
+            if (mailConfBean.getPwdEncrypt() == 1){//加密过的密码，需要解密
+                try {
+                    mailConfBean.setPassword(DesUtil.getInstance().decrypt(mailConfBean.getPassword()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else {//密码没有加密，则需要加密
+                try {
+                    String encryptPwd = DesUtil.getInstance().encrypt(mailConfBean.getPassword());
+                    String sql = "update send_mail set password = ?, pwdEncrypt = ? where user = ?";
+                    queryRunner.update(sql, encryptPwd, "1", mailConfBean.getUser());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+
+            return mailConfBean;
         }
         logger.debug("查询邮件发送者的邮件配置失败");
         return null;
