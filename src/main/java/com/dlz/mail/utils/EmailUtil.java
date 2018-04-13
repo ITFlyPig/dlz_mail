@@ -38,6 +38,7 @@ public class EmailUtil {
         }
 
         // Create the email message
+        logger.debug("开始配置邮件");
         MultiPartEmail email = new MultiPartEmail();
         email.setHostName(mailConf.getHost());
         email.setAuthentication(mailConf.getUser(), mailConf.getPassword());
@@ -59,6 +60,7 @@ public class EmailUtil {
             email.setMsg(content);
 
             //添加附件
+            logger.debug("开始添加附件");
             if (attachmentPaths != null){
                 int size = attachmentPaths.size();
                 for (int i = 0; i < size; i++){
@@ -78,6 +80,7 @@ public class EmailUtil {
                     //将附件的名称加上日期
                     fileName = FileUtil.addTime(fileName);
 
+                    logger.debug("添加的附件：name:" + fileName + " 路径：" + file.getAbsolutePath());
                     attachment.setName(fileName);
                     email.attach(attachment);
 

@@ -26,7 +26,7 @@ public class MailTaskBean {
     public String receptions;//邮件的接受者
     public String copy_to_mails;//邮件的抄送者列表
 
-    public String task_name;//任务的名称,
+    private String task_name;//任务的名称,
 
     public String filePath;//邮件附件的保存路劲
 
@@ -106,7 +106,7 @@ public class MailTaskBean {
 
     public String getTask_name() {
         if (TextUtil.isEmpty(task_name)){
-            task_name = "任务：" + getId();
+            task_name = "excel文件" ;
          }
         return task_name;
     }

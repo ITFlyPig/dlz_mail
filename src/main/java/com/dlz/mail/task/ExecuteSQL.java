@@ -50,9 +50,10 @@ public class ExecuteSQL implements Runnable {
             QueryRunner sqlRunner = new QueryRunner(dataSource);
             try {
                 logger.debug("开始---"+ task.getTask_name() + "----任务的执行");
-                String result = sqlRunner.query(task.sql, new CSVResultHandler(task.task_name, task.getSql_result_store()));
+                String result = sqlRunner.query(task.sql, new CSVResultHandler(task.getTask_name(), task.getSql_result_store()));
                 if (task.getSql_result_store() == Constant.SQL_RESULT_TYPE.CONTENT) {
-                    logger.debug("生成的html文件：" + result);
+//                    logger.debug("生成的html文件：" + result);
+                    logger.debug("html文件生成成功");
                     task.setMailContent(result);
                     handleExecutedTask(task);
                 } else {
@@ -62,12 +63,12 @@ public class ExecuteSQL implements Runnable {
                         task.filePath = path;
                         handleExecutedTask(task);
                     } else {
-                        logger.debug("任务：" + task.task_name + " 创建csv失败");
+                        logger.debug("任务：" + task.getTask_name() + " 创建csv失败");
                     }
                 }
 
             } catch (SQLException e) {
-                logger.debug("任务：" + task.task_name + " 执行sql查询失败");
+                logger.debug("任务：" + task.getTask_name() + " 执行sql查询失败");
                 e.printStackTrace();
             }
 
@@ -104,8 +105,8 @@ public class ExecuteSQL implements Runnable {
             return;
         }
         logger.debug("邮件发送结果：" + (result ? "成功" : "失败"));
-        int status = result ? Constant.EmailStatus.SEND_SUCCESS : Constant.EmailStatus.SEND_FAIL;
-        DBUtil.update(Constant.SQL.UPDATE_TASK_STATUS, status, mailTaskBean.getId());
+//        int status = result ? Constant.EmailStatus.SEND_SUCCESS : Constant.EmailStatus.SEND_FAIL;
+//        DBUtil.update(Constant.SQL.UPDATE_TASK_STATUS, status, mailTaskBean.getId());
 
     }
 

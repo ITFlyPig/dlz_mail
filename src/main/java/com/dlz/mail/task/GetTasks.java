@@ -44,7 +44,8 @@ public class GetTasks implements Runnable {
 
                 logger.debug("开始查询数据库里的任务");
                 //查询新建和更新的任务
-                List<MailTaskBean> tasks = queryRunner.query("select * from mail where status = ? or status = ?", new BeanListHandler<MailTaskBean>(MailTaskBean.class), Constant.EmailStatus.NEW, Constant.EmailStatus.UPDATED);
+                List<MailTaskBean> tasks = queryRunner.query("select * from mail where status = ? or status = ? or status = ?", new BeanListHandler<MailTaskBean>(MailTaskBean.class),
+                        Constant.EmailStatus.NEW, Constant.EmailStatus.UPDATED, Constant.EmailStatus.SQL_EXCUTE_TIMER);
 
                 int size = tasks == null ? 0 : tasks.size();
                 logger.debug("查询到的任务数：" + size);
