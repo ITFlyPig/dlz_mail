@@ -123,12 +123,12 @@ public class ExcelUtil {
             int columNum = 0;
             int rowSize = data.size();//行的size
             for (int i = 0; i < rowSize; i++) {
-                logger.debug("外层循环" );
+//                logger.debug("外层循环" );
                 HSSFRow row = sheet.createRow(i);//创建行
                 List<Object> rowData = data.get(i);//每一行的数据
                 columNum = rowData.size();
                 for (int j = 0; j < rowData.size(); j++) {
-                    logger.debug("内层循环" );
+//                    logger.debug("内层循环" );
                     //创建要显示的内容,创建一个单元格，第一个参数为列坐标，第二个参数为行坐标，第三个参数为内容
                     Object cellData = rowData.get(j);
                     String  cellStr= "";

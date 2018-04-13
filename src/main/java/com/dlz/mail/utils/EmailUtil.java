@@ -5,13 +5,15 @@ import org.apache.commons.mail.*;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import javax.mail.internet.MimeUtility;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
  * 邮件发送的工具类
- * @author wangyuelin
  *
+ * @author wangyuelin
  */
 public class EmailUtil {
     private static final Logger logger = LogManager.getLogger(EmailUtil.class);
@@ -19,20 +21,20 @@ public class EmailUtil {
     public static MailConfBean mailConf;
 
 
-
     /**
      * 发送带附件的邮件
+     *
      * @param attachmentPaths 附件的路径集合
      * @param subject
      * @param content
-     * @param recipients 接收邮件的人
-     * @param copyTos 邮件的抄送人
+     * @param recipients      接收邮件的人
+     * @param copyTos         邮件的抄送人
      */
     public static boolean sendAttachmentEmail(List<String> attachmentPaths,
-                                              String subject, String content, String[] recipients, String[] copyTos){
+                                              String subject, String content, String[] recipients, String[] copyTos) {
         logger.debug("开始发送带附件的邮件");
 
-        if (mailConf == null){
+        if (mailConf == null) {
             logger.debug("发件人邮件的配置为空，返回");
             return false;
         }
@@ -40,55 +42,55 @@ public class EmailUtil {
         // Create the email message
         logger.debug("开始配置邮件");
         MultiPartEmail email = new MultiPartEmail();
+        email.setCharset("utf-8");
         email.setHostName(mailConf.getHost());
         email.setAuthentication(mailConf.getUser(), mailConf.getPassword());
         try {
             email.addTo(recipients);
-            if (TextUtil.isEmpty(mailConf.getUserName())){
+            if (TextUtil.isEmpty(mailConf.getUserName())) {
                 email.setFrom(mailConf.getUser());//不带名称的
-            }else {
+            } else {
                 email.setFrom(mailConf.getUser(), mailConf.getUserName());//带名称
             }
 
-            if (TextUtil.isEmpty(subject)){
+            if (TextUtil.isEmpty(subject)) {
                 subject = "";
             }
             email.setSubject(subject);
-            if (TextUtil.isEmpty(content)){
+            if (TextUtil.isEmpty(content)) {
                 content = " ";
             }
             email.setMsg(content);
 
             //添加附件
             logger.debug("开始添加附件");
-            if (attachmentPaths != null){
+            if (attachmentPaths != null) {
                 int size = attachmentPaths.size();
-                for (int i = 0; i < size; i++){
+                for (int i = 0; i < size; i++) {
                     String path = attachmentPaths.get(i);
-                    File file = new File(path );
+                    File file = new File(path);
                     //发送带附件的邮件
                     EmailAttachment attachment = new EmailAttachment();
                     //附件的路劲
                     attachment.setPath(file.getAbsolutePath());
                     attachment.setDisposition(EmailAttachment.ATTACHMENT);
-                    attachment.setDescription("excel");
+
                     String fileName = FileUtil.getFileNameWithType(path);
-                    if (TextUtil.isEmpty(fileName)){
+                    if (TextUtil.isEmpty(fileName)) {
                         fileName = "查询结果";
                     }
 
                     //将附件的名称加上日期
                     fileName = FileUtil.addTime(fileName);
-
+                    attachment.setDescription(fileName);//setName中文会出问题，使用这个代替
                     logger.debug("添加的附件：name:" + fileName + " 路径：" + file.getAbsolutePath());
-                    attachment.setName(fileName);
                     email.attach(attachment);
 
                 }
             }
 
             //添加抄送人
-            if (copyTos != null && copyTos.length > 0){
+            if (copyTos != null && copyTos.length > 0) {
                 email.addCc(copyTos);
             }
             logger.debug("发送");
@@ -104,17 +106,18 @@ public class EmailUtil {
 
     /**
      * 将错误发送到错误的订阅者
+     *
      * @param toAddress
      * @param subject
      * @param content
      */
-    public static boolean sendMail(String toAddress, String subject, String content){
+    public static boolean sendMail(String toAddress, String subject, String content) {
         logger.debug("开始发送简单邮件");
-        if (mailConf == null){
+        if (mailConf == null) {
             logger.debug("发件人邮件的配置为空");
             return false;
         }
-        if (subject == null){
+        if (subject == null) {
             subject = "";
         }
 
@@ -127,9 +130,9 @@ public class EmailUtil {
         //email.setSSLOnConnect(true);
         //        email.setSSL(true);//commons-mail-1.1支持的方法，1.4中使用setSSLOnConnect(true)代替
         try {
-            if (TextUtil.isEmpty(mailConf.getUserName())){
+            if (TextUtil.isEmpty(mailConf.getUserName())) {
                 email.setFrom(mailConf.getUser());
-            }else {
+            } else {
                 email.setFrom(mailConf.getUser(), mailConf.getUserName());
             }
 
@@ -151,15 +154,16 @@ public class EmailUtil {
 
     /**
      * 发送带html邮件，可以带附件
+     *
      * @param attachmentPaths 附件的路径
      * @param subject
      * @param content
-     * @param recipients 接收邮件的人
-     * @param copyTos 邮件的抄送人
+     * @param recipients      接收邮件的人
+     * @param copyTos         邮件的抄送人
      */
     public static boolean sendHtmlEmail(List<String> attachmentPaths,
-                                        String subject, String content, String[] recipients, String[] copyTos){
-        if (mailConf == null){
+                                        String subject, String content, String[] recipients, String[] copyTos) {
+        if (mailConf == null) {
             logger.debug("发件人邮件的配置为空，返回");
             return false;
         }
@@ -171,25 +175,25 @@ public class EmailUtil {
         htmlEmail.setHostName(mailConf.getHost());
         htmlEmail.setAuthentication(mailConf.getUser(), mailConf.getPassword());
         htmlEmail.setCharset("UTF-8");
-        if (TextUtil.isEmpty(subject)){
+        if (TextUtil.isEmpty(subject)) {
             subject = "";
         }
         htmlEmail.setSubject(subject);
         try {
             //设置邮件的抄送者
             htmlEmail.setHtmlMsg(content);
-            if (copyTos != null && copyTos.length > 0){
+            if (copyTos != null && copyTos.length > 0) {
                 htmlEmail.addCc(copyTos);
             }
             //摄者邮件的发送者
-            if (TextUtil.isEmpty(mailConf.getUserName())){
+            if (TextUtil.isEmpty(mailConf.getUserName())) {
                 htmlEmail.setFrom(mailConf.getUser());
-            }else {
+            } else {
                 htmlEmail.setFrom(mailConf.getUser(), mailConf.getUserName());
             }
 
             //设置邮件的接收
-            if (recipients != null){
+            if (recipients != null) {
                 htmlEmail.addTo(recipients);
             }
         } catch (EmailException e) {
@@ -200,10 +204,10 @@ public class EmailUtil {
         //添加附件
         int size = attachmentPaths.size();
         logger.debug("开始添加附件， 总的附件数：" + size);
-        if (attachmentPaths != null){
-            for (int i = 0; i < size; i++){
+        if (attachmentPaths != null) {
+            for (int i = 0; i < size; i++) {
                 String path = attachmentPaths.get(i);
-                if (TextUtil.isEmpty(path)){
+                if (TextUtil.isEmpty(path)) {
                     continue;
                 }
                 EmailAttachment emailAttachment = new EmailAttachment();
@@ -211,7 +215,7 @@ public class EmailUtil {
                 emailAttachment.setDisposition(EmailAttachment.ATTACHMENT);
                 emailAttachment.setDisposition("excel");
                 String fileName = FileUtil.getFileNameWithType(path);
-                if (TextUtil.isEmpty(fileName)){
+                if (TextUtil.isEmpty(fileName)) {
                     fileName = "查询结果";
                 }
                 emailAttachment.setName(fileName);
@@ -226,7 +230,6 @@ public class EmailUtil {
                 }
             }
         }
-
 
 
         try {
@@ -245,21 +248,22 @@ public class EmailUtil {
 
     /**
      * 发送邮件
+     *
      * @param attachmentPaths
      * @param subject
      * @param content
      * @param recipients
      * @param copyTos
-     * @param type sql查询的结果在邮件中的形式： 0：放在内容   1：放在附件
+     * @param type            sql查询的结果在邮件中的形式： 0：放在内容   1：放在附件
      * @return
      */
     public static boolean sendSQLEmail(List<String> attachmentPaths, String subject,
-                                       String content, String[] recipients, String[] copyTos, int type){
+                                       String content, String[] recipients, String[] copyTos, int type) {
         boolean result = false;
-        if (type == Constant.SQL_RESULT_TYPE.CONTENT){
+        if (type == Constant.SQL_RESULT_TYPE.CONTENT) {
             result = sendHtmlEmail(attachmentPaths, subject, content, recipients, copyTos);
-        }else if (type == Constant.SQL_RESULT_TYPE.ATTACMENT){
-           result = sendAttachmentEmail(attachmentPaths, subject, content, recipients, copyTos);
+        } else if (type == Constant.SQL_RESULT_TYPE.ATTACMENT) {
+            result = sendAttachmentEmail(attachmentPaths, subject, content, recipients, copyTos);
         }
         return result;
     }
