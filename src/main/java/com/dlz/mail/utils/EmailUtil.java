@@ -260,11 +260,11 @@ public class EmailUtil {
     public static boolean sendSQLEmail(List<String> attachmentPaths, String subject,
                                        String content, String[] recipients, String[] copyTos, int type) {
         boolean result = false;
-        if (type == Constant.SQL_RESULT_TYPE.CONTENT) {
+//        if (type == Constant.SQL_RESULT_TYPE.CONTENT) {
             result = sendHtmlEmail(attachmentPaths, subject, content, recipients, copyTos);
-        } else if (type == Constant.SQL_RESULT_TYPE.ATTACMENT) {
-            result = sendAttachmentEmail(attachmentPaths, subject, content, recipients, copyTos);
-        }
+//        } else if (type == Constant.SQL_RESULT_TYPE.ATTACMENT) {
+//            result = sendAttachmentEmail(attachmentPaths, subject, content, recipients, copyTos);
+//        }
         return result;
     }
 }

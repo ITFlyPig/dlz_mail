@@ -29,6 +29,8 @@ public class Test {
     static {
         PropertyConfigurator.configure( System.getProperty("user.dir") + Constant.FileConfig.CONF_DIR +"/log4j.properties");
         logger = LoggerFactory.getLogger(Test.class);
+
+        System.setProperty("mail.mime.splitlongparameters","false");//解决邮件名称过长会被截断的问题
     }
 
 
