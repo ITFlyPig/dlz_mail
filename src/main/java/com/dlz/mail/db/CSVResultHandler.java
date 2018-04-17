@@ -112,7 +112,7 @@ public class CSVResultHandler implements ResultSetHandler<String> {
             ArrayList<Object> clolumnList = new ArrayList<Object>();
             int columnCount = data.getColumnCount();//列的总数目
             for (int i = 1; i <= columnCount; i++) {
-                String clolumnName =  data.getColumnName(i);
+                String clolumnName =  data.getColumnLabel(i);
                 clolumnList.add(clolumnName);
             }
             return clolumnList;

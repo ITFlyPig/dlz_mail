@@ -2,22 +2,21 @@ package com.dlz.mail.utils;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
-
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 public class ExcelUtil {
     private static final Logger logger =  LogManager.getLogger(ExcelUtil.class);
     private static String TAG = "ExcelUtil";
-    private static final int FLUSH_ROW = 300;//3003行开始从内存持久化到磁盘
+    private static final int FLUSH_ROW = 1000;//行开始从内存持久化到磁盘
 
     /**
      * 使用pio创建excel文件
@@ -46,11 +45,14 @@ public class ExcelUtil {
         SXSSFWorkbook wb = null;
         try {
             //第一步创建workbook
+            logger.debug("创建SXSSFWorkbook");
              wb = new SXSSFWorkbook(FLUSH_ROW);
             //第二步创建sheet
             String curTime = TimeUtil.stampToDate(System.currentTimeMillis());
+            logger.debug("创建Sheet");
             Sheet sheet = wb.createSheet(curTime);
             //第三步创建行row:添加表头0行
+            logger.debug("创建和设置CellStyle");
             CellStyle style = wb.createCellStyle();
             style.setAlignment(CellStyle.ALIGN_CENTER);//居中
 
@@ -127,8 +129,9 @@ public class ExcelUtil {
 
             FileOutputStream fout = new FileOutputStream(file);
             wb.write(fout);
-            wb.close();
             fout.close();
+            // dispose of temporary files backing this workbook on disk
+            wb.dispose();
             logger.debug("文件写入成功");
             return fileStr;
         } catch (IOException e) {
