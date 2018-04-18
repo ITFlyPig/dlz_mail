@@ -74,6 +74,14 @@ public class DBUtil {
             dataSource.setJdbcUrl(url);
             dataSource.setUser(user);
             dataSource.setPassword(passsord);
+            dataSource.setInitialPoolSize(10);
+            dataSource.setMinPoolSize(10);
+            dataSource.setMaxPoolSize(30);
+            dataSource.setMaxIdleTime(3600);
+            dataSource.setTestConnectionOnCheckin(true);//设置为true，异步检测连接的有效性
+            dataSource.setTestConnectionOnCheckout(false);//设置为true，所有的连接都将检测其有效性，会影响性能，所以将其设置为false
+            dataSource.setIdleConnectionTestPeriod(120);//每隔多少秒c3p0检测连接的有效性
+
         } catch (PropertyVetoException e) {
             e.printStackTrace();
         }
