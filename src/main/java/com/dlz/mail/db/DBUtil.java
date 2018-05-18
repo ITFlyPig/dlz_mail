@@ -1,15 +1,11 @@
 package com.dlz.mail.db;
 
-import com.dlz.mail.bean.MailTaskBean;
 import com.dlz.mail.utils.DesUtil;
-import com.dlz.mail.utils.Log;
 import com.dlz.mail.utils.TextUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mysql.cj.jdbc.PreparedStatement;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.log4j.LogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyVetoException;
 import java.io.*;
@@ -77,10 +73,15 @@ public class DBUtil {
             dataSource.setInitialPoolSize(10);
             dataSource.setMinPoolSize(10);
             dataSource.setMaxPoolSize(30);
+
+//            dataSource.setInitialPoolSize(1);
+//            dataSource.setMinPoolSize(1);
+//            dataSource.setMaxPoolSize(3);
+
             dataSource.setMaxIdleTime(3600);
             dataSource.setTestConnectionOnCheckin(true);//设置为true，异步检测连接的有效性
             dataSource.setTestConnectionOnCheckout(false);//设置为true，所有的连接都将检测其有效性，会影响性能，所以将其设置为false
-            dataSource.setIdleConnectionTestPeriod(120);//每隔多少秒c3p0检测连接的有效性
+            dataSource.setIdleConnectionTestPeriod(18000);//每隔多少秒c3p0检测连接的有效性
 
         } catch (PropertyVetoException e) {
             e.printStackTrace();
