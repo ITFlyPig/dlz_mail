@@ -159,7 +159,7 @@ public class CSVResultHandler implements ResultSetHandler<String> {
                 value = rs.getArray(index);
                 break;
             case Types.BIGINT :
-                value = rs.getInt(index);
+                value = rs.getString(index);
                 break;
             case Types.BINARY:
                 value = rs.getBinaryStream(index);
