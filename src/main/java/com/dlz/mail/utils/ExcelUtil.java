@@ -100,7 +100,7 @@ public class ExcelUtil {
         logger.debug("将数据生成文件开始：outPutPath：" + outPutPath + " fileName：" + fileName );
         //第六步将生成excel文件保存到指定路径下
         try {
-            String fileStr = outPutPath + File.separator + fileName + ".xlsx";
+            String fileStr = outPutPath + File.separator + fileName + FileUtil.getNowFileSuffix() + ".xlsx";
             logger.debug("创建的文件的路劲：" + fileStr);
 
             File file = new File(fileStr);
@@ -113,16 +113,17 @@ public class ExcelUtil {
                 logger.debug("父文件夹存在");
             }
             logger.debug("开始检测文件是否存在");
-            if (!file.exists()) {
-                try {
-                    logger.debug("不存在，开始创建文件");
-                    file.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    logger.debug( "缓存文件创建失败");
-                }
-            }else {
-                logger.debug("文件存在");
+            if (file.exists()) {
+                file.delete();//避免使用老的文件
+                logger.debug("文件存在，删除老的文件");
+            }
+
+            try {
+                logger.debug("开始创建新文件");
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                logger.debug("文件创建失败");
             }
 
             logger.debug("文件创建成功");

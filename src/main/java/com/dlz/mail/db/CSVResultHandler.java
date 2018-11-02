@@ -183,7 +183,7 @@ public class CSVResultHandler implements ResultSetHandler<String> {
                 value = rs.getInt(index);
                 break;
             case Types.DECIMAL:
-                value = rs.getLong(index);
+                value = rs.getString(index);
                 break;
             default:
                 value = rs.getObject(index);

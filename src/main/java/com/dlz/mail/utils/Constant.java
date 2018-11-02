@@ -55,6 +55,7 @@ public class Constant {
 	public interface Key{
 		String EMAIL_TASK_ID = "email_task_id";
 		String TASK_NAME = "task_name";
+		String OBJ = "obj";
 	}
 
 	/**

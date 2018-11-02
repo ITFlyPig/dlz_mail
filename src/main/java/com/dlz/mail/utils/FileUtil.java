@@ -1,6 +1,10 @@
 package com.dlz.mail.utils;
 
 
+import com.dlz.mail.task.ExecuteSQL;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import java.io.*;
 import java.nio.file.*;
 import java.sql.Timestamp;
@@ -14,6 +18,8 @@ public class FileUtil {
     private static final String TAG = "FileUtil";
 
     private static int ZIP_SIZE = 2 * 1024 * 1024;//文件大小超过2M就进行压缩
+
+    private static final Logger logger = LogManager.getLogger(FileUtil.class);
 
 
 
@@ -128,4 +134,88 @@ public class FileUtil {
 
     }
 
+    /**
+     * 获取此时文件的后缀，因为可能存在对大问价的压缩，两个线程同时在压缩一个文件（即往一个文件里写数据，最终的数据是不正确的）
+     * @return
+     */
+    public static String getNowFileSuffix() {
+        return "_suffix_" +  System.currentTimeMillis();
+    }
+
+
+    /**
+     * 重命名多线程创建的文件,文件名称末尾是时间戳的才修改,例如   /Downloads/wiznote-macos-2018-10-30_suffix_123456789.dmg
+     * @param filePath
+     * @return
+     */
+    public static String renameFile(String filePath) {
+        if (TextUtil.isEmpty(filePath)) {
+            return null;
+        }
+        File oldFile = new File(filePath);
+        if (!oldFile.exists()) {
+            return null;
+        }
+
+        String wantedPath = getWantedPath(filePath);
+        if (TextUtil.isEmpty(wantedPath)) {
+            return null;
+        }
+        File newFile = new File(wantedPath);
+        oldFile.renameTo(newFile);
+        return newFile.getAbsolutePath();
+
+
+    }
+
+    /**
+     * 想要的路径，因为为了多线程，在文件生成的时候会在文件后面添加当时的时间戳，真正使用的时候要除去时间戳
+     * @param filePath
+     * @return
+     */
+    public static String getWantedPath(String filePath) {
+        if (TextUtil.isEmpty(filePath)) {
+            return null;
+        }
+        int start = filePath.lastIndexOf("_suffix_");
+        int end = filePath.lastIndexOf(".");
+        if (start >= end || start < 0) {
+            return filePath;
+        }
+
+        return filePath.substring(0, start) + filePath.substring(end, filePath.length());
+
+    }
+
+
+    /**
+     * 压缩文件
+     *
+     * @param filePath
+     * @return
+     */
+    public static String handleZIP(String filePath) {
+        if (TextUtil.isEmpty(filePath)) {
+            logger.debug("handleZIP 压缩文件，传入的文件路径为空，直接返回");
+            return null;
+        }
+
+        if (FileUtil.shouldZIP(filePath)) {
+            File srcFile = new File(filePath);
+            File[] files = new File[]{srcFile};
+
+            String zipName = FileUtil.getFileName(filePath) + ".zip";
+            String zipPath = srcFile.getParent() + File.separator + zipName;
+
+            //开始压缩前判断之前是否存在相同的压缩文件，存在就删除
+            File oldZip = new File(zipPath);
+            oldZip.deleteOnExit();
+
+            ZipFileUtil.compressFiles2Zip(files, zipPath);
+
+            return zipPath;
+        }
+        return filePath;
+
+    }
 }

@@ -1,17 +1,14 @@
 package com.dlz.mail.bean;
 
-import com.dlz.mail.Test;
-import com.dlz.mail.db.CSVResultHandler;
-import com.dlz.mail.utils.Log;
 import com.dlz.mail.utils.TextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Date;
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
-public class MailTaskBean {
+public class MailTaskBean implements Serializable, Cloneable{
     private static final Logger logger = LoggerFactory.getLogger(MailTaskBean.class);
 
     public int id;
@@ -28,7 +25,8 @@ public class MailTaskBean {
 
     private String task_name;//任务的名称,
 
-    public String filePath;//邮件附件的保存路劲
+    public String filePath;//邮件附件的保存路劲，因为为了避免冲突，生成文件的时候会在文件的实际名称后面加上后缀
+    public String fileName;//文件的实际名称
 
     public String subject;//邮件的主题
     public String mailContent;//邮件的内容
@@ -182,6 +180,14 @@ public class MailTaskBean {
         this.sql_result_store = sql_result_store;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     /**
      * 生成执行sql的表达式
      * @return
@@ -244,4 +250,9 @@ public class MailTaskBean {
         return reArray;
     }
 
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

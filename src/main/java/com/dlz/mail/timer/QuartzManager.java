@@ -1,10 +1,10 @@
 package com.dlz.mail.timer;
 
+import com.dlz.mail.bean.ValidTaskBean;
+import com.dlz.mail.task.ValidTaskSchedulerListener;
 import com.dlz.mail.utils.TextUtil;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-
-import java.util.Calendar;
 
 import static com.dlz.mail.utils.Constant.Key.TASK_NAME;
 
@@ -15,6 +15,24 @@ public class QuartzManager {
     private static SchedulerFactory schedulerFactory = new StdSchedulerFactory();
     private static String JOB_GROUP_NAME = "EXTJWEB_JOBGROUP_NAME";
     private static String TRIGGER_GROUP_NAME = "EXTJWEB_TRIGGERGROUP_NAME";
+    private static  ValidTaskSchedulerListener validTaskSchedulerListener = new ValidTaskSchedulerListener();
+    private static Scheduler sched = null;
+
+    static {
+
+        try {
+            sched = schedulerFactory.getScheduler();
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            sched.getListenerManager().addSchedulerListener(validTaskSchedulerListener);
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     /**
      * @Description: 添加一个定时任务
@@ -25,12 +43,12 @@ public class QuartzManager {
      * @param cron   时间设置，参考quartz说明文档
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static void addJob(String jobName, String emailTaskId,  String triggerName, Class jobClass, String cron, Object obj) {
+    public static void addJob(String jobName, String emailTaskId, String triggerName, Class jobClass, String cron, Object obj) {
         try {
             removeJob(jobName, triggerName);
 
 
-            Scheduler sched = schedulerFactory.getScheduler();
+
             sched.deleteJob(JobKey.jobKey(jobName, JOB_GROUP_NAME));// 删除任务,相同的任务只需要定时一次
             // 任务名，任务组，任务执行类
             JobDetail jobDetail= JobBuilder.newJob(jobClass).withIdentity(jobName, JOB_GROUP_NAME).build();
@@ -53,6 +71,10 @@ public class QuartzManager {
             triggerBuilder.withSchedule(CronScheduleBuilder.cronSchedule(cron));
             // 创建Trigger对象
             CronTrigger trigger = (CronTrigger) triggerBuilder.build();
+            JobDataMap triggerDataMap = trigger.getJobDataMap();
+            if (triggerDataMap != null) {
+                triggerDataMap.put("obj", obj);
+            }
 
             // 调度容器设置JobDetail和Trigger
             sched.scheduleJob(jobDetail, trigger);
@@ -158,4 +180,40 @@ public class QuartzManager {
         }
     }
 
+
+    /**
+     * 构建触发器的名称
+     * @param taskId
+     * @param uuid
+     * @return
+     */
+    public static String getTriggerName(int taskId, String uuid) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("triggerName");
+        buffer.append(taskId);
+        if (!TextUtil.isEmpty(uuid)) {
+            buffer.append(uuid);
+        }
+       return buffer.toString();
+
+    }
+
+    /**
+     * 据触发器的名称获取触发器对应的任务的uuid
+     * @param triggerName
+     * @return
+     */
+    public static String getUUIDByTriggerName(String triggerName) {
+        if (TextUtil.isEmpty(triggerName)) {
+            return null;
+        }
+        if (triggerName.indexOf("_") < 0) {
+            return null;
+        }
+        String[] splitArray = triggerName.split("_");
+        if (splitArray.length < 0) {
+            return null;
+        }
+        return splitArray[splitArray.length - 1];
+    }
 }

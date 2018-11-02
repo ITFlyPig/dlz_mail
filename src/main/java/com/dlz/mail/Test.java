@@ -1,16 +1,13 @@
 package com.dlz.mail;
 
 import com.dlz.mail.bean.MailConfBean;
-import com.dlz.mail.bean.MailTaskBean;
 import com.dlz.mail.db.DBUtil;
 import com.dlz.mail.queue.TaskQueue;
-import com.dlz.mail.task.ExecuteSQL;
 import com.dlz.mail.task.GetTasks;
 import com.dlz.mail.task.MonitorTask;
 import com.dlz.mail.utils.Constant;
 import com.dlz.mail.utils.DesUtil;
 import com.dlz.mail.utils.EmailUtil;
-import com.dlz.mail.utils.Log;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -18,10 +15,10 @@ import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Test {
     private static final Logger logger;

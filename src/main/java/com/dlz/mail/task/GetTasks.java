@@ -2,8 +2,10 @@ package com.dlz.mail.task;
 
 import com.dlz.mail.Job.ExcuteSqlJob;
 import com.dlz.mail.bean.MailTaskBean;
+import com.dlz.mail.bean.ValidTaskBean;
 import com.dlz.mail.db.DBUtil;
 import com.dlz.mail.queue.TaskQueue;
+import com.dlz.mail.queue.ValidTaskContainer;
 import com.dlz.mail.timer.QuartzManager;
 import com.dlz.mail.utils.Constant;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -28,7 +30,7 @@ import java.util.List;
  */
 public class GetTasks implements Runnable {
     private static final Logger logger = LogManager.getLogger(GetTasks.class);
-    private boolean isStop;
+    private volatile boolean isStop;
 
     private TaskQueue taskQueue;
 
@@ -49,6 +51,18 @@ public class GetTasks implements Runnable {
 
                 int size = tasks == null ? 0 : tasks.size();
                 logger.debug("查询到的任务数：" + size);
+
+
+                //构造测试数据
+//                MailTaskBean temp = tasks.get(0);
+//                try {
+//                    MailTaskBean newOne = (MailTaskBean) temp.clone();
+//                    tasks.add(newOne);
+//                } catch (CloneNotSupportedException e) {
+//                    e.printStackTrace();
+//                }
+                //end测试
+
 
                 timerTasks(tasks);
 
@@ -76,8 +90,13 @@ public class GetTasks implements Runnable {
             logger.debug("开始对任务定时：" + task.getTask_name());
             //定时之前把以前的删除
             QuartzManager.removeJob(task.getTask_name() + "sql执行", "excute_sql" + String.valueOf(task.getId()));
-            QuartzManager.addJob(task.getTask_name() + "sql执行", String.valueOf(task.getId()), "excute_sql" + String.valueOf(task.getId()), ExcuteSqlJob.class, task.getSend_time(), null);
+
+            ValidTaskBean validTaskBean = ValidTaskContainer.getValidTaskBean(task);
+            QuartzManager.addJob(task.getTask_name() + "sql执行", String.valueOf(task.getId()),"excute_sql" + String.valueOf(task.getId()), ExcuteSqlJob.class, task.getSend_time(), validTaskBean);
+
             DBUtil.update("update mail set  status = ?  where id = ?", Constant.EmailStatus.SQL_EXCUTE_TIMER, task.getId());
+
+
         }
 
     }
