@@ -3,7 +3,7 @@ package com.dlz.mail.db;
 import com.dlz.mail.utils.DesUtil;
 import com.dlz.mail.utils.TextUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.mysql.cj.jdbc.PreparedStatement;
+import com.mysql.jdbc.PreparedStatement;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.log4j.LogManager;
 
