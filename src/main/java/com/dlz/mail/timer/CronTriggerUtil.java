@@ -1,7 +1,5 @@
 package com.dlz.mail.timer;
 
-import com.dlz.mail.task.MonitorTask;
-import com.dlz.mail.utils.Log;
 import com.dlz.mail.utils.TextUtil;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;

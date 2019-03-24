@@ -6,14 +6,16 @@ import com.dlz.mail.db.CSVResultHandler;
 import com.dlz.mail.db.DBUtil;
 import com.dlz.mail.queue.ValidTaskContainer;
 import com.dlz.mail.timer.QuartzManager;
-import com.dlz.mail.utils.*;
+import com.dlz.mail.utils.Constant;
+import com.dlz.mail.utils.EmailUtil;
+import com.dlz.mail.utils.FileUtil;
+import com.dlz.mail.utils.TextUtil;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,24 +1,15 @@
 package com.dlz.mail.Job;
 
 import com.dlz.mail.Test;
-import com.dlz.mail.bean.MailTaskBean;
 import com.dlz.mail.bean.ValidTaskBean;
-import com.dlz.mail.db.DBUtil;
-import com.dlz.mail.queue.TaskQueue;
 import com.dlz.mail.task.ExecuteSQL;
 import com.dlz.mail.utils.Constant;
 import com.dlz.mail.utils.TextUtil;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.log4j.LogManager;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
-import java.sql.SQLException;
-import java.util.List;
 
 //执行sql查询的job
 public class ExcuteSqlJob implements Job {

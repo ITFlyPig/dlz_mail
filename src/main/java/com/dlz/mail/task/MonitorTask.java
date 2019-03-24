@@ -1,8 +1,6 @@
 package com.dlz.mail.task;
 
-import com.dlz.mail.Job.ExcuteSqlJob;
 import com.dlz.mail.utils.Constant;
-import com.dlz.mail.utils.Log;
 import com.dlz.mail.utils.TextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
